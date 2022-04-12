@@ -34,7 +34,6 @@
 	</root>
 
 	<logger name="com.revature" level="INFO">
-		<appender-ref ref="FILE" />
 	</logger>
 
 </configuration>
