@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spellbook-deployment
+spec:
+  selector:
+    matchLabels:
+      app: spellbook
+  template:
+    metadata:
+      labels:
+        app: spellbook
+    spec:
+      containers:
+      - name: spellbook-container
+        image: cunananan/spellbook:latest
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 8080
+        env:
+          - name: JWT_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: spellbook-secret
+                key: jwt-key
+          - name: DB_URL
+            valueFrom:
+              secretKeyRef:
+                name: spellbook-secret
+                key: db-url
+          - name: DB_USER
+            valueFrom:
+              secretKeyRef:
+                name: spellbook-secret
+                key: db-username
+          - name: DB_PASS
+            valueFrom:
+              secretKeyRef:
+                name: spellbook-secret
+                key: db-password
