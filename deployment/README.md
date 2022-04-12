@@ -1,0 +1,1 @@
+# Place all your kubernetes manifests (.yml) in here!
