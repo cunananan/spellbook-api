@@ -8,6 +8,7 @@ import javax.transaction.Transactional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.revature.exceptions.UserAlreadyExistsException;
@@ -23,10 +24,12 @@ import com.revature.util.ValidationUtil;
 public class UserService {
 	
 	private UserRepository ur;
+	private PasswordEncoder pe;
 	
 	@Autowired
-	public UserService(UserRepository ur) {
+	public UserService(UserRepository ur, PasswordEncoder pe) {
 		this.ur = ur;
+		this.pe = pe;
 	}
 	
 	public List<UserDto> getUsers() {
@@ -74,6 +77,7 @@ public class UserService {
 			throw new UserAlreadyExistsException("User with that username or email already exists");
 		}
 		newUser.setId(0);
+		newUser.setPassword(pe.encode(newUser.getPassword()));
 		return new UserDto(ur.save(newUser));
 	}
 	
@@ -85,8 +89,8 @@ public class UserService {
 		if (!ValidationUtil.validatePassword(newPassword)) {
 			throw new ValidationException("New password is invalid");
 		}
-		// TODO hashPassword
-		user.setPassword(newPassword);
+
+		user.setPassword(pe.encode(newPassword));
 		return new UserDto(ur.save(user));
 	}
 	
