@@ -8,6 +8,8 @@ import javax.transaction.Transactional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.revature.exceptions.UserAlreadyExistsException;
@@ -75,6 +77,34 @@ public class UserService {
 		}
 		newUser.setId(0);
 		return new UserDto(ur.save(newUser));
+	}
+	
+	@Transactional
+	public String updateUser(int userId, String newPassword, UserRole newRole) {
+		String message = "";
+		int numUpdates = 0;
+		boolean newPassInvalid = false;
+		if (newRole != UserRole.NOT_SET) {
+			updateUserRole(userId, newRole);
+			message += "Role ";
+			numUpdates++;
+		}
+		if (!StringUtils.isBlank(newPassword)) {
+			if (ValidationUtil.validatePassword(newPassword)) {
+				updateUserPassword(userId, newPassword);
+				message += (numUpdates == 0) ? "Password " : "and password ";
+				numUpdates++;
+			} else {
+				newPassInvalid = true;
+			}
+		}
+		message += (numUpdates == 0) ? "No fields " : "";
+		message += (numUpdates == 1) ? "was updated" : "were updated";
+		message += (newPassInvalid) ? "; new password was invalid" : "";
+		if (numUpdates == 0) {
+			throw new ValidationException(message); 
+		}
+		return message;
 	}
 	
 	@Transactional
