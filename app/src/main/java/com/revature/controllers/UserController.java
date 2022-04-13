@@ -29,7 +29,6 @@ import com.revature.models.User.UserRole;
 import com.revature.models.UserDto;
 import com.revature.services.AuthService;
 import com.revature.services.UserService;
-import com.revature.util.ValidationUtil;
 
 @RestController
 @RequestMapping("/users")
