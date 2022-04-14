@@ -140,6 +140,35 @@ public class UserServiceTests {
 	}
 	
 	@Test
+	void updateUserTestX() {
+		assertThrows(ValidationException.class, () -> {
+			us.updateUser(1, null, null);
+		});
+		assertThrows(ValidationException.class, () -> {
+			us.updateUser(1, "", UserRole.NOT_SET);
+		});
+	}
+	
+	@Test
+	void updateUserTest0() {
+		String newPass = "val1d-passw0rd";
+		User user = new User(users.get(1));
+		User updatedUser = new User(user);
+		updatedUser.setPassword(newPass);
+		updatedUser.setRole(UserRole.STAFF);
+		when(mockRepo.findById(2)).thenReturn(Optional.of(user));
+		when(mockRepo.save(user)).thenReturn(updatedUser);
+		assertDoesNotThrow(() -> {
+			assertEquals("Role was updated; new password was invalid",
+			             us.updateUser(2, "   ", UserRole.STAFF));
+			assertEquals("Password was updated",
+			             us.updateUser(2, newPass, UserRole.NOT_SET));
+			assertEquals("Role and password were updated",
+			             us.updateUser(2, newPass, UserRole.STAFF));
+		});
+	}
+	
+	@Test
 	void updateUserPasswordTestX0() {
 		when(mockRepo.findById(0)).thenReturn(Optional.empty());
 		assertThrows(UserNotFoundException.class, () -> {

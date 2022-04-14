@@ -82,6 +82,34 @@ public class UserService {
 	}
 	
 	@Transactional
+	public String updateUser(int userId, String newPassword, UserRole newRole) {
+		String message = "";
+		int numUpdates = 0;
+		boolean newPassInvalid = false;
+		if (newRole != null && newRole != UserRole.NOT_SET) {
+			updateUserRole(userId, newRole);
+			message += "Role ";
+			numUpdates++;
+		}
+		if (newPassword != null && !newPassword.equals("")) {
+			if (ValidationUtil.validatePassword(newPassword)) {
+				updateUserPassword(userId, newPassword);
+				message += (numUpdates == 0) ? "Password " : "and password ";
+				numUpdates++;
+			} else {
+				newPassInvalid = true;
+			}
+		}
+		message += (numUpdates == 0) ? "No fields " : "";
+		message += (numUpdates == 1) ? "was updated" : "were updated";
+		message += (newPassInvalid) ? "; new password was invalid" : "";
+		if (numUpdates == 0) {
+			throw new ValidationException(message); 
+		}
+		return message;
+	}
+	
+	@Transactional
 	public UserDto updateUserPassword(int userId, String newPassword) {
 		User user = ur.findById(userId).orElseThrow(() ->
                                            new UserNotFoundException("User not found") );
