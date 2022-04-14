@@ -119,11 +119,7 @@ public class UserController {
 	{
 		MDC.put("user", as.extractUsernameFromToken(token));
 		MDC.put("requestId", UUID.randomUUID().toString());
-		// Only admins and the id's user can view this
-		if (!as.authorizeRole(token, UserRole.ADMIN) && !as.authorizeUser(token, id)) {
-			LOG.warn("Failed to modify User #" + id);
-			throw new AccessDeniedException("Not authorized to modify user");
-		}
+		
 		// Admin can change user role and password without confirmation
 		if (as.authorizeRole(token, UserRole.ADMIN)) {
 			String message = us.updateUser(id, newPass, userRoleFromString(newRole));
@@ -139,9 +135,10 @@ public class UserController {
 			LOG.info("Password was updated for User #" + id);
 			return new ResponseEntity<>("Password was updated", HttpStatus.CREATED);
 		}
-		// Should be unreachable unless something changes with authorization mid-execution
-		LOG.error("Something went wrong with authorization while updating user");
-		return new ResponseEntity<>("Something went wrong with user update...", HttpStatus.INTERNAL_SERVER_ERROR);
+		else {
+			LOG.warn("Failed to modify User #" + id);
+			throw new AccessDeniedException("Not authorized to modify user");
+		}
 	}
 	
 	@DeleteMapping("/{id}")

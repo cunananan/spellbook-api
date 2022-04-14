@@ -82,12 +82,12 @@ public class UserService {
 		String message = "";
 		int numUpdates = 0;
 		boolean newPassInvalid = false;
-		if (newRole != UserRole.NOT_SET) {
+		if (newRole != null && newRole != UserRole.NOT_SET) {
 			updateUserRole(userId, newRole);
 			message += "Role ";
 			numUpdates++;
 		}
-		if (!StringUtils.isBlank(newPassword)) {
+		if (newPassword != null && !newPassword.equals("")) {
 			if (ValidationUtil.validatePassword(newPassword)) {
 				updateUserPassword(userId, newPassword);
 				message += (numUpdates == 0) ? "Password " : "and password ";
