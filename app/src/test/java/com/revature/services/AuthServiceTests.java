@@ -14,6 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.revature.exceptions.AuthenticationException;
@@ -22,11 +23,11 @@ import com.revature.models.User;
 import com.revature.models.User.UserRole;
 import com.revature.repositories.UserRepository;
 
+@SpringBootTest
 @ExtendWith(MockitoExtension.class)
 public class AuthServiceTests {
 	
 	private static UserRepository mockRepo;
-	@Autowired
 	private static PasswordEncoder pe;
 	private static AuthService as;
 	private static User admin;
@@ -38,13 +39,14 @@ public class AuthServiceTests {
 	@BeforeAll
 	public static void setup() {
 		mockRepo = mock(UserRepository.class);
-		as = new AuthService(mockRepo, pe);
+		pe = mock(PasswordEncoder.class);
+		as = new AuthService(mockRepo, pe, "this string is a fake secret key");
 		admin = new User(1, "admin", "mail@inter.net", "1234asdf", UserRole.ADMIN);
 		user = new User(2, "user", "ex@mple.com", "p4ssw0rd", UserRole.USER);
 		
-		adminToken = "eyJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwic3ViIjoiYWRtaW4iLCJyb2xlIjoiQURNSU4ifQ.iabSqnl9-ZDnyT-xzZzUGhspmWlIWcoCJ-4vxeH0c10";
-		userToken = "eyJhbGciOiJIUzI1NiJ9.eyJpZCI6Miwic3ViIjoidXNlciIsInJvbGUiOiJVU0VSIn0.5O3_NkZVZF84DWHPE0m4yf5Y80iqIp4w2AmL504rQ_s";
-		badToken = "eyJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwic3ViIjoiYWRtaW4iLCJyb2xlIjoiQURNSU4ifQ.iabSqnl9-ZDnyT-xzZzUGhspmWlIWcoCJ";
+		adminToken = "eyJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwic3ViIjoiYWRtaW4iLCJyb2xlIjoiQURNSU4ifQ.2S3t4AOfx4RPKF7sP9TKCkYdC60cknKNuxTUKfcMNd0";
+		userToken = "eyJhbGciOiJIUzI1NiJ9.eyJpZCI6Miwic3ViIjoidXNlciIsInJvbGUiOiJVU0VSIn0.rdSk6AyqHe_l8JxQ-KMu-t1E-T-bO9FbbCYyTjcmUtk";
+		badToken = "eyJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwic3ViIjoiYWRtaW4iLCJyb2xlIjoiQURNSU4ifQ.2S3t4AOfx4RPKF7sP9TKCkYdC60cknKNuxTUKfcMNd0";
 	}
 	
 	@Test

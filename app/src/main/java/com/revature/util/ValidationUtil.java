@@ -16,14 +16,14 @@ public class ValidationUtil {
 	private static final String PASSWORD_PATTERN = "^(?=.*[0-9!@#&()-[{}]:;',?/*~$^+=<>])(?=.*[a-zA-Z]).{8,255}$";
 	
 	public static boolean validateUsername(String value) {
-		return Pattern.compile(USERNAME_PATTERN).matcher(value).matches();
+		return value != null && Pattern.compile(USERNAME_PATTERN).matcher(value).matches();
 	}
 	
 	public static boolean validateEmail(String value) {
-		return Pattern.compile(EMAIL_PATTERN).matcher(value).matches();
+		return value != null &&  Pattern.compile(EMAIL_PATTERN).matcher(value).matches();
 	}
 	
 	public static boolean validatePassword(String value) {
-		return Pattern.compile(PASSWORD_PATTERN).matcher(value).matches();
+		return value != null &&  Pattern.compile(PASSWORD_PATTERN).matcher(value).matches();
 	}
 }

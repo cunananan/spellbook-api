@@ -16,6 +16,7 @@ public class ValidationUtilTests {
 		assertTrue(ValidationUtil.validateUsername("test1"));
 		assertFalse(ValidationUtil.validateUsername("admi"));
 		assertFalse(ValidationUtil.validateUsername("admin!"));
+		assertFalse(ValidationUtil.validateUsername(null));
 	}
 	
 	@Test
@@ -23,6 +24,7 @@ public class ValidationUtilTests {
 		assertTrue(ValidationUtil.validateEmail("admin@test.com"));
 		assertFalse(ValidationUtil.validateEmail("admin"));
 		assertFalse(ValidationUtil.validateEmail("@com"));
+		assertFalse(ValidationUtil.validateEmail(null));
 	}
 	
 	@Test
@@ -32,5 +34,6 @@ public class ValidationUtilTests {
 		assertTrue(ValidationUtil.validatePassword("testuser!"));
 		assertFalse(ValidationUtil.validatePassword("admin"));
 		assertFalse(ValidationUtil.validatePassword("admin!"));
+		assertFalse(ValidationUtil.validatePassword(null));
 	}
 }
