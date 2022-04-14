@@ -3,6 +3,8 @@ package com.revature.services;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -12,8 +14,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -46,7 +46,7 @@ public class AuthServiceTests {
 		
 		adminToken = "eyJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwic3ViIjoiYWRtaW4iLCJyb2xlIjoiQURNSU4ifQ.2S3t4AOfx4RPKF7sP9TKCkYdC60cknKNuxTUKfcMNd0";
 		userToken = "eyJhbGciOiJIUzI1NiJ9.eyJpZCI6Miwic3ViIjoidXNlciIsInJvbGUiOiJVU0VSIn0.rdSk6AyqHe_l8JxQ-KMu-t1E-T-bO9FbbCYyTjcmUtk";
-		badToken = "eyJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwic3ViIjoiYWRtaW4iLCJyb2xlIjoiQURNSU4ifQ.2S3t4AOfx4RPKF7sP9TKCkYdC60cknKNuxTUKfcMNd0";
+		badToken = "eyJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwic3ViIjoiYWRtaW4iLCJyb2xlIjoiQURNSU4ifQ.2S3t4fx4RPKF7sP9TKCkYdC60cknKNuxTUKfcMNd0";
 	}
 	
 	@Test
@@ -73,6 +73,7 @@ public class AuthServiceTests {
 	@Test
 	void loginTest0() {
 		when(mockRepo.findByUsernameOrEmail("admin", "admin")).thenReturn(Optional.of(admin));
+		when(pe.matches(any(), anyString())).thenReturn(true);
 		assertDoesNotThrow(() -> {
 			assertEquals(adminToken, as.login("admin", "1234asdf"));
 		});
@@ -81,6 +82,7 @@ public class AuthServiceTests {
 	@Test
 	void loginTest1() {
 		when(mockRepo.findByUsernameOrEmail("ex@mple.com", "ex@mple.com")).thenReturn(Optional.of(user));
+		when(pe.matches(any(), anyString())).thenReturn(true);
 		assertDoesNotThrow(() -> {
 			assertEquals(userToken, as.login("ex@mple.com", "p4ssw0rd"));
 		});
@@ -150,6 +152,7 @@ public class AuthServiceTests {
 	@Test
 	void verifyPasswordTest0() {
 		when(mockRepo.findById(1)).thenReturn(Optional.of(admin));
+		when(pe.matches(anyString(), anyString())).thenReturn(false);
 		assertDoesNotThrow(() -> {
 			assertEquals(false, as.verifyPassword(adminToken, user.getPassword()));
 		});
@@ -158,6 +161,7 @@ public class AuthServiceTests {
 	@Test
 	void verifyPasswordTest1() {
 		when(mockRepo.findById(1)).thenReturn(Optional.of(admin));
+		when(pe.matches(anyString(), anyString())).thenReturn(true);
 		assertDoesNotThrow(() -> {
 			assertEquals(true, as.verifyPassword(adminToken, admin.getPassword()));
 		});
