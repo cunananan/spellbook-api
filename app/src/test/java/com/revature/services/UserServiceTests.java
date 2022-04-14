@@ -14,6 +14,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.revature.exceptions.UserAlreadyExistsException;
 import com.revature.exceptions.UserNotFoundException;
@@ -27,6 +29,8 @@ import com.revature.repositories.UserRepository;
 public class UserServiceTests {
 	
 	private static UserRepository mockRepo;
+	@Autowired
+	private static PasswordEncoder pe;
 	private static UserService us;
 	private static List<User> users;
 	private static List<UserDto> usersDto;
@@ -34,7 +38,7 @@ public class UserServiceTests {
 	@BeforeAll
 	public static void setup() {
 		mockRepo = mock(UserRepository.class);
-		us = new UserService(mockRepo);
+		us = new UserService(mockRepo, pe);
 		
 		User admin = new User(1, "admin", "mail@inter.net", "1234asdf", UserRole.ADMIN);
 		User user = new User(2, "user", "ex@mple.com", "p4ssw0rd", UserRole.USER);

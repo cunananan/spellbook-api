@@ -12,6 +12,9 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.revature.exceptions.AuthenticationException;
 import com.revature.exceptions.AuthorizationException;
@@ -23,6 +26,8 @@ import com.revature.repositories.UserRepository;
 public class AuthServiceTests {
 	
 	private static UserRepository mockRepo;
+	@Autowired
+	private static PasswordEncoder pe;
 	private static AuthService as;
 	private static User admin;
 	private static User user;
@@ -33,7 +38,7 @@ public class AuthServiceTests {
 	@BeforeAll
 	public static void setup() {
 		mockRepo = mock(UserRepository.class);
-		as = new AuthService(mockRepo);
+		as = new AuthService(mockRepo, pe);
 		admin = new User(1, "admin", "mail@inter.net", "1234asdf", UserRole.ADMIN);
 		user = new User(2, "user", "ex@mple.com", "p4ssw0rd", UserRole.USER);
 		
