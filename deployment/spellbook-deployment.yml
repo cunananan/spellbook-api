@@ -16,6 +16,9 @@ spec:
         image: cunananan/spellbook:latest
         ports:
         - containerPort: 8080
+        volumeMounts:
+        - name: logs
+          mountPath: /logs
         env:
           - name: JWT_SECRET
             valueFrom:
@@ -37,3 +40,19 @@ spec:
               secretKeyRef:
                 name: spellbook-secret
                 key: db-password
+      - name: promtail-container
+        image: grafana/promtail
+        args:
+        - -config.file=/etc/promtail/promtail.yaml
+        volumeMounts:
+        - name: logs
+          mountPath: /var/log
+        - name: promtail-config
+          mountPath: /etc/promtail
+      volumes:
+      - name: logs
+        emptyDir: {}
+      - name: promtail-config
+        configMap: 
+          name: promtail-configmap
+
