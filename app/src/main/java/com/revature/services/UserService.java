@@ -8,6 +8,7 @@ import javax.transaction.Transactional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.revature.exceptions.UserAlreadyExistsException;
@@ -23,10 +24,12 @@ import com.revature.util.ValidationUtil;
 public class UserService {
 	
 	private UserRepository ur;
+	private PasswordEncoder pe;
 	
 	@Autowired
-	public UserService(UserRepository ur) {
+	public UserService(UserRepository ur, PasswordEncoder pe) {
 		this.ur = ur;
+		this.pe = pe;
 	}
 	
 	public List<UserDto> getUsers() {
@@ -74,7 +77,36 @@ public class UserService {
 			throw new UserAlreadyExistsException("User with that username or email already exists");
 		}
 		newUser.setId(0);
+		newUser.setPassword(pe.encode(newUser.getPassword()));
 		return new UserDto(ur.save(newUser));
+	}
+	
+	@Transactional
+	public String updateUser(int userId, String newPassword, UserRole newRole) {
+		String message = "";
+		int numUpdates = 0;
+		boolean newPassInvalid = false;
+		if (newRole != null && newRole != UserRole.NOT_SET) {
+			updateUserRole(userId, newRole);
+			message += "Role ";
+			numUpdates++;
+		}
+		if (newPassword != null && !newPassword.equals("")) {
+			if (ValidationUtil.validatePassword(newPassword)) {
+				updateUserPassword(userId, newPassword);
+				message += (numUpdates == 0) ? "Password " : "and password ";
+				numUpdates++;
+			} else {
+				newPassInvalid = true;
+			}
+		}
+		message += (numUpdates == 0) ? "No fields " : "";
+		message += (numUpdates == 1) ? "was updated" : "were updated";
+		message += (newPassInvalid) ? "; new password was invalid" : "";
+		if (numUpdates == 0) {
+			throw new ValidationException(message); 
+		}
+		return message;
 	}
 	
 	@Transactional
@@ -85,8 +117,8 @@ public class UserService {
 		if (!ValidationUtil.validatePassword(newPassword)) {
 			throw new ValidationException("New password is invalid");
 		}
-		// TODO hashPassword
-		user.setPassword(newPassword);
+
+		user.setPassword(pe.encode(newPassword));
 		return new UserDto(ur.save(user));
 	}
 	

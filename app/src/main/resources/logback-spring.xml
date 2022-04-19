@@ -33,8 +33,7 @@
 		<appender-ref ref="FILE" />
 	</root>
 
-	<logger name="com.revature" level="INFO">
-		<appender-ref ref="FILE" />
+	<logger name="com.revature" level="ALL">
 	</logger>
 
 </configuration>

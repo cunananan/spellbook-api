@@ -8,6 +8,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.revature.exceptions.AuthenticationException;
@@ -31,12 +33,20 @@ public class AuthService {
 	private static final Logger LOG = LoggerFactory.getLogger(AuthService.class);
 	
 	private UserRepository ur;
+	private PasswordEncoder pe;
 	private Key secretKey;
 	
+	final String secretX;
+	
+	
 	@Autowired
-	public AuthService(UserRepository ur) {
+	public AuthService(UserRepository ur, PasswordEncoder pe, @Value("${security.jwt.token.secret-key}") final String secretX) {
+		
+		this.secretX = secretX;
 		this.ur = ur;
-		String secret = "dQw4w9WgXcQdQw4w9WgXcQdQw4w9WgXcQ";
+		this.pe = pe;
+		LOG.debug("Is the secret here? : " + secretX);
+		String secret = secretX;
 		secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
 	}
 	
@@ -52,8 +62,7 @@ public class AuthService {
 		                 .orElseThrow(() -> 
 		                	 new AuthenticationException("Could not find user with username or email of: " + user)
 		                 );
-		// TODO hash password here
-		if (!userObj.getPassword().equals(password)) {
+		if (!pe.matches(password, userObj.getPassword())) {
 			throw new AuthenticationException("Incorrect password");
 		}
 		return generateToken(userObj);
@@ -90,8 +99,7 @@ public class AuthService {
 		User user = ur.findById(extractIdFromToken(token))
 					  .orElseThrow(() -> 
 	           	          new AuthorizationException("Could not find user from token") );
-		// TODO hash password here
-		return user.getPassword().equals(password);
+		return pe.matches(password, user.getPassword());
 	}
 	
 	public int extractIdFromToken(String token) {
@@ -160,6 +168,7 @@ public class AuthService {
 //		                 .setExpiration(exp)
 		                 .signWith(secretKey, SignatureAlgorithm.HS256)
 		                 .compact();
+		LOG.debug("Secret is being initialized after constructor : SOLVED " + secretX);
 		LOG.info("New JWT was generated for user: " + user.getUsername());
 		return jws;
 	}

@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spellbook-deployment
+  namespace: team-epimetheus
+spec:
+  selector:
+    matchLabels:
+      app: spellbook
+  template:
+    metadata:
+      labels:
+        app: spellbook
+    spec:
+      containers:
+      - name: spellbook-container
+        image: cunananan/spellbook:latest
+        ports:
+        - containerPort: 8080
+        volumeMounts:
+        - name: logs
+          mountPath: /logs
+        env:
+          - name: JWT_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: spellbook-secret
+                key: jwt-key
+          - name: DB_URL
+            valueFrom:
+              secretKeyRef:
+                name: spellbook-secret
+                key: db-url
+          - name: DB_USER
+            valueFrom:
+              secretKeyRef:
+                name: spellbook-secret
+                key: db-username
+          - name: DB_PASS
+            valueFrom:
+              secretKeyRef:
+                name: spellbook-secret
+                key: db-password
+      - name: promtail-container
+        image: grafana/promtail
+        args:
+        - -config.file=/etc/promtail/promtail-config.yml
+        volumeMounts:
+        - name: logs
+          mountPath: /var/log
+        - name: promtail-config
+          mountPath: /etc/promtail
+      volumes:
+      - name: logs
+        emptyDir: {}
+      - name: promtail-config
+        configMap: 
+          name: promtail-configmap
+

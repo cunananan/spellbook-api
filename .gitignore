@@ -1,5 +1,6 @@
 ##### User Defined #####
 
+secret.yml
 creds.properties
 
 # Created by https://www.toptal.com/developers/gitignore/api/eclipse,java,maven
