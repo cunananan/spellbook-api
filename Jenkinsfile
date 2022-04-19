@@ -1,34 +1,54 @@
 pipeline {
-    agent { dockerfile true }
+    agent any
+    environment {
+        registry = 'cunananan/spellbook'
+    }
     stages {
-        stage("Check code quality") {
+        stage("Analyzing code quality") {
             steps {
-                sh 'mvn verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=030722-VA-SRE_team-epimetheus'
+                echo 'Analyzing code quality...'
+                withSonarQubeEnv(credentialsId: 'sonar-token', installationName: 'sonar') {
+                    sh 'mvn verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=030722-VA-SRE_team-epimetheus'
+                }
             }
         }
-        stage("Maven clean package") {
+        stage("Building Docker image") {
             steps {
-                sh 'mvn clean package'
+                echo 'Building Docker image...'
+                script {
+                    dockerImage = docker.build "$registry"
+                }
             }
         }
-        stage("Docker build") {
+        stage("Pushing image to DockerHub") {
             steps {
-                sh 'docker build -t cunananan/spellbook:latest .'
+                echo 'Pushing image to DockerHub...'
+                // TODO
             }
         }
-        stage("Push image to DockerHub") {
+        stage("Awaiting approval") {
             steps {
-
+                echo 'Awaiting approval...'
+                script {
+                    // Prompt, if yes build, if no abort
+                    try {
+                        timeout(time: 30, unit: 'MINUTES'){
+                            approved = input message: 'Deploy to production?', ok: 'Continue',
+                                parameters: [choice(name: 'approved', choices: 'Yes\nNo', description: 'Deploy this build to production')]
+                            if(approved != 'Yes'){
+                                error('Build not approved')
+                            }
+                        }
+                    } catch (error){
+                        error('Build not approved in time')
+                    }
+                }
             }
         }
-        stage("Await approval") {
+        stage("Deploying to EKS") {
             steps {
-
-            }
-        }
-        stage("Deploy to Kubernetes") {
-            steps {
-
+                echo 'Deploying to EKS'
+                
             }
         }
     }
