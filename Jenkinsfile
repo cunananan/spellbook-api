@@ -8,7 +8,7 @@ pipeline {
             steps {
                 echo 'Analyzing code quality...'
                 withSonarQubeEnv(credentialsId: 'sonar-token', installationName: 'sonar-qube') {
-                    sh 'mvn verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=030722-VA-SRE_team-epimetheus'
+                    sh 'mvn -f app/pom.xml verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=030722-VA-SRE_team-epimetheus'
                 }
             }
         }
