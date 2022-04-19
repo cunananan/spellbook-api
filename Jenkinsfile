@@ -1,12 +1,15 @@
 pipeline {
     agent any
     environment {
+        versionNumber = '1'
         registry = 'cunananan/spellbook'
+        dockerHubCreds = 'dockerhub'
+        dockerImage = ''
     }
     stages {
         stage("Analyzing code quality") {
             steps {
-                echo 'Analyzing code quality...'
+                echo '========> Analyzing code quality...'
                 withSonarQubeEnv(credentialsId: 'sonar-token', installationName: 'sonar-qube') {
                     sh 'mvn -f app/pom.xml verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=030722-VA-SRE_team-epimetheus'
                 }
@@ -14,7 +17,7 @@ pipeline {
         }
         stage("Building Docker image") {
             steps {
-                echo 'Building Docker image...'
+                echo '========> Building Docker image...'
                 script {
                     dockerImage = docker.build "$registry"
                 }
@@ -22,13 +25,18 @@ pipeline {
         }
         stage("Pushing image to DockerHub") {
             steps {
-                echo 'Pushing image to DockerHub...'
-                // TODO
+                echo '========> Pushing image to DockerHub...'
+                script {
+                    docker.withRegistry('', dockerHubCreds) {
+                        dockerImage.push("$versionNumber.$currentBuild.number")
+                        dockerImage.push("latest")
+                    }
+                }
             }
         }
         stage("Awaiting approval") {
             steps {
-                echo 'Awaiting approval...'
+                echo '========> Awaiting approval...'
                 script {
                     // Prompt, if yes build, if no abort
                     try {
@@ -47,7 +55,7 @@ pipeline {
         }
         stage("Deploying to EKS") {
             steps {
-                echo 'Deploying to EKS'
+                echo '========> Deploying to EKS'
                 
             }
         }
