@@ -67,9 +67,9 @@ pipeline {
                         sh 'aws eks update-kubeconfig --name kevin-sre-1285'
                         sh "echo $registry:$versionNumber.$currentBuild.number"
                         sh "./kubectl set image -n $eksNamespace $appDeployment $appContainer=$registry:$versionNumber.$currentBuild.number"
+                        // sh './kubectl apply -f deployment'
                         sh "./kubectl get all -n $eksNamespace"
                         sh "./kubectl describe $appDeployment"
-                        // sh './kubectl apply -f deployment'
                     }
                 }
             }
