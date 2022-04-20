@@ -45,7 +45,6 @@ public class AuthService {
 		this.secretX = secretX;
 		this.ur = ur;
 		this.pe = pe;
-		LOG.debug("Is the secret here? : " + secretX);
 		String secret = secretX;
 		secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
 	}
@@ -93,6 +92,8 @@ public class AuthService {
 	}
 	
 	public boolean verifyPassword(String token, String password) {
+		
+		
 		if (StringUtils.isBlank(token)) {
 			throw new AuthorizationException("Null token");
 		}
@@ -168,7 +169,7 @@ public class AuthService {
 //		                 .setExpiration(exp)
 		                 .signWith(secretKey, SignatureAlgorithm.HS256)
 		                 .compact();
-		LOG.debug("Secret is being initialized after constructor : SOLVED " + secretX);
+		LOG.debug("generateToken method ran");
 		LOG.info("New JWT was generated for user: " + user.getUsername());
 		return jws;
 	}
