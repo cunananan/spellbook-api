@@ -1,5 +1,6 @@
 ##### User Defined #####
 
+test/**/Generate*
 secret.yml
 creds.properties
 
