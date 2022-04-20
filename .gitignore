@@ -1,5 +1,8 @@
 ##### User Defined #####
 
+kube-creds.txt
+**/test/**/Generate*
+standup.sh
 secret.yml
 creds.properties
 
