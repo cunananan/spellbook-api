@@ -65,9 +65,10 @@ pipeline {
                         sh 'curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"'
                         sh 'chmod u+x ./kubectl'
                         sh 'aws eks update-kubeconfig --name kevin-sre-1285'
-                        sh "./kubectl get all -n $eksNamespace"
                         sh "echo $registry:$versionNumber.$currentBuild.number"
                         sh "./kubectl set image -n $eksNamespace $appDeployment $appContainer=$registry:$versionNumber.$currentBuild.number"
+                        sh "./kubectl get all -n $eksNamespace"
+                        sh "./kubectl describe $appDeployment"
                         // sh './kubectl apply -f deployment'
                     }
                 }
