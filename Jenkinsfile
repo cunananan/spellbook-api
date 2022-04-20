@@ -3,6 +3,9 @@ pipeline {
     environment {
         versionNumber = '1'
         registry = 'cunananan/spellbook'
+        eksNamespace = 'team-epimetheus'
+        appDeployment = 'deployment.apps/spellbook-deployment'
+        appContainer = 'spellbook-container'
         dockerHubCreds = 'dockerhub'
         dockerImage = ''
     }
@@ -56,7 +59,18 @@ pipeline {
         stage("Deploying to EKS") {
             steps {
                 echo '========> Deploying to EKS'
-                
+                script {
+                    withAWSCredentials(credentials: 'sre-aws-creds', region: 'us-east-1') {
+                        // Install k8s onto agent
+                        sh 'curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"'
+                        sh 'chmod u+x ./kubectl'
+                        sh 'aws eks update-kubeconfig --name kevin-sre-1285'
+                        sh "./kubectl get all -n $eksNamespace"
+                        sh "echo $registry:$versionNumber.$currentBuild.number"
+                        sh "./kubectl set image -n $eksNamespace $appDeployment $appContainer=$registry:$versionNumber.$currentBuild.number"
+                        // sh './kubectl apply -f deployment'
+                    }
+                }
             }
         }
     }
