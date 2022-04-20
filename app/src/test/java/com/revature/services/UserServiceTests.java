@@ -14,6 +14,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.revature.exceptions.UserAlreadyExistsException;
 import com.revature.exceptions.UserNotFoundException;
@@ -27,6 +28,7 @@ import com.revature.repositories.UserRepository;
 public class UserServiceTests {
 	
 	private static UserRepository mockRepo;
+	private static PasswordEncoder pe;
 	private static UserService us;
 	private static List<User> users;
 	private static List<UserDto> usersDto;
@@ -34,7 +36,8 @@ public class UserServiceTests {
 	@BeforeAll
 	public static void setup() {
 		mockRepo = mock(UserRepository.class);
-		us = new UserService(mockRepo);
+		pe = mock(PasswordEncoder.class);
+		us = new UserService(mockRepo, pe);
 		
 		User admin = new User(1, "admin", "mail@inter.net", "1234asdf", UserRole.ADMIN);
 		User user = new User(2, "user", "ex@mple.com", "p4ssw0rd", UserRole.USER);
@@ -127,8 +130,8 @@ public class UserServiceTests {
 	
 	@Test
 	void addUserTest0() {
-		User u = new User(-1, "noob", "git@gud.org", "5crubl0rd", UserRole.USER);
-		User up = new User(3, "noob", "git@gud.org", "5crubl0rd", UserRole.USER);
+		User u = new User(-1, "xX_noob_Xx", "git@gud.org", "5crubl0rd", UserRole.USER);
+		User up = new User(3, "xX_noob_Xx", "git@gud.org", "5crubl0rd", UserRole.USER);
 		UserDto ud = new UserDto(up);
 		
 		when(mockRepo.existsUserByUsername("admin")).thenReturn(false);
@@ -154,7 +157,7 @@ public class UserServiceTests {
 		String newPass = "val1d-passw0rd";
 		User user = new User(users.get(1));
 		User updatedUser = new User(user);
-		updatedUser.setPassword(newPass);
+		updatedUser.setPassword(pe.encode(newPass));
 		updatedUser.setRole(UserRole.STAFF);
 		when(mockRepo.findById(2)).thenReturn(Optional.of(user));
 		when(mockRepo.save(user)).thenReturn(updatedUser);
