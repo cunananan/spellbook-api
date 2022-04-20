@@ -69,7 +69,7 @@ pipeline {
                         sh "./kubectl set image -n $eksNamespace $appDeployment $appContainer=$registry:$versionNumber.$currentBuild.number"
                         // sh './kubectl apply -f deployment'
                         sh "./kubectl get all -n $eksNamespace"
-                        sh "./kubectl describe $appDeployment"
+                        sh "./kubectl describe $appDeployment -n $eksNamespace"
                     }
                 }
             }
