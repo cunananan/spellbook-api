@@ -19,12 +19,12 @@ import com.revature.models.User.UserRole;
 import com.revature.repositories.UserRepository;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
+import io.micrometer.core.annotation.Timed;
 
 @Service
 public class AuthService {
@@ -50,6 +50,7 @@ public class AuthService {
 	}
 	
 	// Returns token as string iff successful
+	@Timed(value="login.time")
 	public String login(String user, String password) {
 		if (StringUtils.isBlank(user)) {
 			throw new AuthenticationException("Username or email was not provided");

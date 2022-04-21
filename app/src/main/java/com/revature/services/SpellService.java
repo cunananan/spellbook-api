@@ -18,6 +18,8 @@ import com.revature.models.Spell.SpellType;
 import com.revature.models.SpellDto;
 import com.revature.repositories.SpellRepository;
 
+import io.micrometer.core.annotation.Timed;
+
 @Service
 public class SpellService {
 
@@ -30,6 +32,7 @@ public class SpellService {
 		this.sr = sr;
 	}
 	
+	@Timed(value="spell.time")
 	public List<SpellDto> getSpells() {
 		LOG.debug("getSpells method ran");
 
@@ -41,6 +44,7 @@ public class SpellService {
 		return spells.stream().map(SpellDto::new).collect(Collectors.toList());
 	}
 	
+	@Timed(value="spell.time")
 	@Transactional
 	public List<SpellDto> getSpellsByQuery(String search, SpellType type, int priceCap, Boolean inStock,
             int intCap, int faiCap, int arcCap)
@@ -71,12 +75,14 @@ public class SpellService {
 		return spellsDto;
 	}
 	
+	@Timed(value="spell.time")
 	public SpellDto getSpellById(int id) {
 		Spell spell = sr.findById(id).orElseThrow(() -> 
 		                                 new ItemNotFoundException("Spell not found") );
 		return new SpellDto(spell);
 	}
 	
+	@Timed(value="spell.time")
 	public SpellDto addSpell(SpellDto newSpell) {
 		if (newSpell == null) newSpell = new SpellDto();
 		newSpell.id = -1;	// Ensure we don't overwrite an existing item
@@ -86,6 +92,7 @@ public class SpellService {
 		return newSpell;
 	}
 	
+	@Timed(value="spell.time")
 	@Transactional
 	public SpellDto updateSpell(SpellDto spellUpdates) {
 		if (spellUpdates == null) {
@@ -99,6 +106,7 @@ public class SpellService {
 		return spellUpdates;
 	}
 	
+	@Timed(value="spell.time")
 	@Transactional
 	public SpellDto deleteSpell(int id) {
 		Spell removedSpell = sr.findById(id).orElseThrow(() -> 
@@ -108,6 +116,7 @@ public class SpellService {
 	}
 	
 	// This is slow and I kind of hate it
+	@Timed(value="spell.time")
 	private List<Spell> findBySearchNameAndDescription(String search) {
 		List<Spell> nameList = sr.findByNameContainingIgnoreCaseOrderByIdAsc(search);
 		List<Spell> descList = sr.findByDescriptionContainingIgnoreCaseOrderByIdAsc(search);
