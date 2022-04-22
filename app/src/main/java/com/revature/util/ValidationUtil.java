@@ -4,6 +4,9 @@ import java.util.regex.Pattern;
 
 public class ValidationUtil {
 	
+	private ValidationUtil() {
+		throw new IllegalStateException("Utility class");
+	}
 	/* Username consists of alphanumeric characters and dots, underscores, 
 	 * and hyphens and must be between 5 and 255 characters in length. 
 	 */
