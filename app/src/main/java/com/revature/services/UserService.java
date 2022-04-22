@@ -22,6 +22,8 @@ import com.revature.models.UserDto;
 import com.revature.repositories.UserRepository;
 import com.revature.util.ValidationUtil;
 
+import io.micrometer.core.annotation.Timed;
+
 @Service
 public class UserService {
 	
@@ -35,6 +37,7 @@ public class UserService {
 		this.pe = pe;
 	}
 	
+	@Timed(value="user.time")
 	public List<UserDto> getUsers() {
 		LOG.debug("getUsers method ran");
 		List<User> users = ur.findAllByOrderByIdAsc();
@@ -45,6 +48,7 @@ public class UserService {
 		return users.stream().map(UserDto::new).collect(Collectors.toList());
 	}
 	
+	@Timed(value="user.time")
 	@Transactional
 	public List<UserDto> getUsersByQuery(String search, UserRole role) {
 		List<User> users = (StringUtils.isBlank(search))
@@ -62,12 +66,14 @@ public class UserService {
 		return usersDto;
 	}
 	
+	@Timed(value="user.time")
 	public UserDto getUserById(int id) {
 		User user = ur.findById(id).orElseThrow(() ->
 		                               new UserNotFoundException("User not found") );
 		return new UserDto(user);
 	}
 	
+	@Timed(value="user.time")
 	@Transactional
 	public UserDto addUser(User newUser) {
 		if (newUser == null) {
@@ -85,6 +91,7 @@ public class UserService {
 		return new UserDto(ur.save(newUser));
 	}
 	
+	@Timed(value="user.time")
 	@Transactional
 	public String updateUser(int userId, String newPassword, UserRole newRole) {
 		String message = "";
@@ -113,6 +120,7 @@ public class UserService {
 		return message;
 	}
 	
+	@Timed(value="user.time")
 	@Transactional
 	public UserDto updateUserPassword(int userId, String newPassword) {
 		User user = ur.findById(userId).orElseThrow(() ->
@@ -126,6 +134,7 @@ public class UserService {
 		return new UserDto(ur.save(user));
 	}
 	
+	@Timed(value="user.time")
 	@Transactional
 	public UserDto updateUserRole(int userId, UserRole newRole) throws UserNotFoundException, ValidationException {
 		User user = ur.findById(userId).orElseThrow(() ->
@@ -136,7 +145,8 @@ public class UserService {
 		user.setRole(newRole);
 		return new UserDto(ur.save(user));
 	}
-	 
+	
+	@Timed(value="user.time")
 	@Transactional
 	public UserDto deleteUser(int id) {
 		User removedUser = ur.findById(id).orElseThrow(() -> 
