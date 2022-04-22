@@ -22,6 +22,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.revature.exceptions.AccessDeniedException;
+import com.revature.exceptions.InsufficientFundsException;
+import com.revature.exceptions.OutOfStockException;
+import com.revature.exceptions.ValidationException;
 import com.revature.models.Spell.SpellType;
 import com.revature.models.SpellDto;
 import com.revature.models.User.UserRole;
@@ -57,42 +60,34 @@ public class SpellController {
 	{
 		setMDC(ENDPOINT, "GET", token);
 		
-		SpellType type = null;
-		int priceCap = -1;
-		Boolean inStock = null;
-		int intCap = -1;
-		int faiCap = -1;
-		int arcCap = -1;
 		boolean queriesAllNull = true;
-		
 		if (!StringUtils.isBlank(searchStr)) {
 			queriesAllNull = false;
 		}
-		if (!StringUtils.isBlank(typeStr)) {
-			type = spellTypeFromString(typeStr);
-			if (type != SpellType.NOT_SET) queriesAllNull = false;
+		SpellType type = spellTypeFromString(typeStr);
+		if (type != SpellType.NOT_SET) {
+			queriesAllNull = false;
 		}
-		if (!StringUtils.isBlank(priceCapStr)) {
-			priceCap = intFromString(priceCapStr);
-			if (priceCap >= 0) queriesAllNull = false;
+		int priceCap = intFromString(priceCapStr);
+		if (priceCap >= 0) {
+			queriesAllNull = false;
 		}
-		if (!StringUtils.isBlank(inStockStr)) {
-			inStock = booleanFromString(inStockStr);
-			if (inStock != null) queriesAllNull = false;
+		Boolean inStock = booleanFromString(inStockStr);
+		if (inStock != null) {
+			queriesAllNull = false;
 		}
-		if (!StringUtils.isBlank(intCapStr)) {
-			intCap = intFromString(intCapStr);
-			if (intCap >= 0) queriesAllNull = false;
+		int intCap = intFromString(intCapStr);
+		if (intCap >= 0) {
+			queriesAllNull = false;
 		}
-		if (!StringUtils.isBlank(faiCapStr)) {
-			faiCap = intFromString(faiCapStr);
-			if (faiCap >= 0) queriesAllNull = false;
+		int faiCap = intFromString(faiCapStr);
+		if (faiCap >= 0) {
+			queriesAllNull = false;
 		}
-		if (!StringUtils.isBlank(arcCapStr)) {
-			arcCap = intFromString(arcCapStr);
-			if (arcCap >= 0) queriesAllNull = false;
+		int arcCap = intFromString(arcCapStr);
+		if (arcCap >= 0) {
+			queriesAllNull = false;
 		}
-		
 		List<SpellDto> spells = (queriesAllNull)
 		                            ? ss.getSpells()
 		                            : ss.getSpellsByQuery(searchStr, type, priceCap, inStock, intCap, faiCap, arcCap);
@@ -111,6 +106,30 @@ public class SpellController {
 		return new ResponseEntity<>(spell, HttpStatus.OK);
 	}
 	
+	@PostMapping("/{id}/buy")
+	public ResponseEntity<String> buySpell(@RequestHeader(name="Authorization", required=false) String token,
+	                                       @PathVariable("id") int id,
+	                                       @RequestParam(name="funds", required=false) String fundsStr)
+	{
+		setMDC(ENDPOINT + "/" + id + "/buy", "POST", token);
+		
+		if (!as.authorizeRole(token, UserRole.USER)) {
+			throw new AccessDeniedException("Not authorized to buy spells");
+		}
+		int funds = intFromString(fundsStr);
+		if (funds < 0) {
+			throw new ValidationException("Valid funds were not provided");
+		}
+		String productKey = "product-key:";
+		try {
+			productKey += ss.buySpell(id, funds).toString();
+		} catch (OutOfStockException | InsufficientFundsException e) {
+			LOG.warn("Failed to purchase spell #{}: {}", id, e.getMessage());
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+		}
+		return new ResponseEntity<>(productKey, HttpStatus.OK);
+	}
+	
 	@PostMapping
 	public ResponseEntity<String> addSpell(@RequestHeader(name="Authorization", required=false) String token,
 	                                       @RequestBody SpellDto newSpell)
@@ -123,16 +142,6 @@ public class SpellController {
 		SpellDto spell = ss.addSpell(newSpell);
 		LOG.info("{} was created", spell);
 		return new ResponseEntity<>("New spell \"" + spell.name + "\" was added at index " + spell.id, HttpStatus.CREATED);
-	}
-	
-	@PostMapping("/{id}/buy")
-	public ResponseEntity<String> buySpell(@RequestHeader(name="Authorization", required=false) String token,
-	                                       @PathVariable("id") int id,
-	                                       @RequestParam(name="funds", defaultValue="0") String funds)
-	{
-		setMDC(ENDPOINT + "/" + id + "/buy", "POST", token);
-		
-		return null;
 	}
 	
 	@PutMapping("/{id}")
@@ -169,10 +178,13 @@ public class SpellController {
 		MDC.put("endpoint", endpoint);
 		MDC.put("method", method);
 		MDC.put("user", as.extractUsernameFromToken(token));
-		MDC.put("requestId", UUID.randomUUID().toString());
+		MDC.put("requestId", UUID.randomUUID());
 	}
 	
 	private int intFromString(String intStr) {
+		if (StringUtils.isBlank(intStr)) {
+			return -1;
+		}
 		try {
 			return Integer.parseInt(intStr);
 		} catch (NumberFormatException e) {
@@ -183,6 +195,9 @@ public class SpellController {
 	}
 	
 	private Boolean booleanFromString(String boolStr) {
+		if (StringUtils.isBlank(boolStr)) {
+			return null;
+		}
 		if (boolStr.equalsIgnoreCase("true")) {
 			return Boolean.TRUE;
 		} else if (boolStr.equalsIgnoreCase("false")) {
@@ -194,6 +209,9 @@ public class SpellController {
 	}
 	
 	private SpellType spellTypeFromString(String typeStr) {
+		if (StringUtils.isBlank(typeStr)) {
+			return SpellType.NOT_SET;
+		}
 		try {
 			return SpellType.valueOf(typeStr.toUpperCase());
 		} catch (IllegalArgumentException e) {

@@ -12,7 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.revature.exceptions.InsufficientFundsException;
 import com.revature.exceptions.ItemNotFoundException;
+import com.revature.exceptions.OutOfStockException;
 import com.revature.exceptions.ValidationException;
 import com.revature.models.Spell;
 import com.revature.models.Spell.SpellType;
@@ -83,11 +85,17 @@ public class SpellService {
 	
 	@Timed(value="spell.time")
 	@Transactional
-	public UUID buySpell(int id, int funds) {
-//		Spell spell = sr.findById(id).orElseThrow(() -> 
-//                                         new ItemNotFoundException("Spell not found") );
-//		
-//		
+	public UUID buySpell(int id, int funds) throws OutOfStockException, InsufficientFundsException {
+		Spell spell = sr.findById(id).orElseThrow(() -> 
+                                         new ItemNotFoundException("Spell not found") );
+		if (spell.getStock() <= 0)
+			throw new OutOfStockException("Out of stock");
+		if (funds < spell.getPrice())
+			throw new InsufficientFundsException("Insufficient funds; price is " + spell.getPrice());
+		
+		spell.setStock(spell.getStock() - 1);
+		sr.save(spell);
+		// Return a product key for the spell
 		return UUID.randomUUID();
 	}
 	

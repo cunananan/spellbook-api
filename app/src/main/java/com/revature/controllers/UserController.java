@@ -158,7 +158,7 @@ public class UserController {
 		MDC.put("endpoint", endpoint);
 		MDC.put("method", method);
 		MDC.put("user", as.extractUsernameFromToken(token));
-		MDC.put("requestId", UUID.randomUUID().toString());
+		MDC.put("requestId", UUID.randomUUID());
 	}
 	
 	private UserRole userRoleFromString(String roleStr) {
