@@ -22,10 +22,10 @@ spec:
         resources:
           requests:
             memory: "64Mi"
-            cpu: "250m"
+            cpu: "50m"
           limits:
             memory: "512Mi"
-            cpu: "500m"
+            cpu: "100m"
         volumeMounts:
         - name: logs
           mountPath: /logs
@@ -57,10 +57,10 @@ spec:
         resources:
           requests:
             memory: "64Mi"
-            cpu: "250m"
+            cpu: "50m"
           limits:
             memory: "256Mi"
-            cpu: "500m"
+            cpu: "100m"
         volumeMounts:
         - name: logs
           mountPath: /var/log
