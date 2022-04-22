@@ -1,0 +1,21 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  creationTimestamp: null
+  labels:
+    release: prom
+    role: alert-rules
+  name: prometheus-rules
+spec:
+  groups:
+  - name: SLOs-Test
+    rules:
+    - alert: Alert-Test
+      annotations:
+        message: 'BZZZZRRRRT This is a test of the Spellbook alerting system BZZZZRRRRT'
+      expr: |
+        up{job="spellbook-service", namespace="team-epimetheus"} == 1
+      for: 1m
+      labels:
+        job: spellbook-service
+        severity: test
