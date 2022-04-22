@@ -34,26 +34,10 @@ public class AuthController {
 	public ResponseEntity<String> login(@RequestParam(required=false) String username,
 	                                    @RequestParam(required=false) String password)
 	{
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< Updated upstream
-=======
-		MDC.clear();
-		MDC.put("endpoint", "/auth");
-		MDC.put("method", "POST");
->>>>>>> 8d7cf9155f0283557c15f7c41b2ba1cdaa2f9fc9
-=======
-		MDC.clear();
-		MDC.put("endpoint", "/auth");
-		MDC.put("method", "POST");
->>>>>>> 8d7cf9155f0283557c15f7c41b2ba1cdaa2f9fc9
-		MDC.put("requestId", UUID.randomUUID().toString());
-=======
 		MDC.clear();
 		MDC.put("endpoint", "/auth");
 		MDC.put("method", "POST");
 		MDC.put("requestId", UUID.randomUUID());
->>>>>>> Stashed changes
 		// Login will throw runtime exceptions if credentials are bad
 		String token = as.login(username, password);
 		HttpHeaders headers = new HttpHeaders();
