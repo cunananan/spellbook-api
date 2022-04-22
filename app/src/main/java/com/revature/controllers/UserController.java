@@ -169,7 +169,7 @@ public class UserController {
 			return UserRole.valueOf(roleStr.toUpperCase());
 		} catch (IllegalArgumentException e) {
 			LOG.debug("UserController.userRoleFromString() is catching exception: {}", e.getMessage());
-			LOG.warn("User is passing bad argument through \"role\" param: {}", roleStr);
+			LOG.warn("User is passing bad argument through a UserRole param: {}", roleStr);
 			return UserRole.NOT_SET;
 		}
 	}

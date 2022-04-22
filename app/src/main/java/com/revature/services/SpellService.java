@@ -1,6 +1,7 @@
 package com.revature.services;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -78,6 +79,16 @@ public class SpellService {
 		Spell spell = sr.findById(id).orElseThrow(() -> 
 		                                 new ItemNotFoundException("Spell not found") );
 		return new SpellDto(spell);
+	}
+	
+	@Timed(value="spell.time")
+	@Transactional
+	public UUID buySpell(int id, int funds) {
+//		Spell spell = sr.findById(id).orElseThrow(() -> 
+//                                         new ItemNotFoundException("Spell not found") );
+//		
+//		
+		return UUID.randomUUID();
 	}
 	
 	@Timed(value="spell.time")

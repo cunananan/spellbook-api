@@ -125,6 +125,16 @@ public class SpellController {
 		return new ResponseEntity<>("New spell \"" + spell.name + "\" was added at index " + spell.id, HttpStatus.CREATED);
 	}
 	
+	@PostMapping("/{id}/buy")
+	public ResponseEntity<String> buySpell(@RequestHeader(name="Authorization", required=false) String token,
+	                                       @PathVariable("id") int id,
+	                                       @RequestParam(name="funds", defaultValue="0") String funds)
+	{
+		setMDC(ENDPOINT + "/" + id + "/buy", "POST", token);
+		
+		return null;
+	}
+	
 	@PutMapping("/{id}")
 	public ResponseEntity<SpellDto> updateSpell(@RequestHeader(name="Authorization", required=false) String token,
 	                                            @PathVariable("id") int id, @RequestBody SpellDto updates)
@@ -167,7 +177,7 @@ public class SpellController {
 			return Integer.parseInt(intStr);
 		} catch (NumberFormatException e) {
 			LOG.debug("SpellController.intFromString() is catching exception: {}", e.getMessage());
-			LOG.warn("User is passing bad argument through `___Cap` param: {}", intStr);
+			LOG.warn("User is passing bad argument through an integer param: {}", intStr);
 			return -1;
 		}
 	}
@@ -178,7 +188,7 @@ public class SpellController {
 		} else if (boolStr.equalsIgnoreCase("false")) {
 			return Boolean.FALSE;
 		} else {
-			LOG.warn("User is passing bad argument through `inStock` param: {}", boolStr);
+			LOG.warn("User is passing bad argument through a boolean param: {}", boolStr);
 			return null;
 		}
 	}
@@ -188,7 +198,7 @@ public class SpellController {
 			return SpellType.valueOf(typeStr.toUpperCase());
 		} catch (IllegalArgumentException e) {
 			LOG.debug("SpellController.spellTypeFromString() is catching exception: {}", e.getMessage());
-			LOG.warn("User is passing bad argument through `type` param: {}", typeStr);
+			LOG.warn("User is passing bad argument through a SpellType param: {}", typeStr);
 			return SpellType.NOT_SET;
 		}
 	}

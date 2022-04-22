@@ -1,6 +1,6 @@
 package com.revature.exceptions;
 
-public class AccessDeniedException  extends RuntimeException {
+public class AccessDeniedException extends RuntimeException {
 
 	/**
 	 * 
@@ -9,27 +9,22 @@ public class AccessDeniedException  extends RuntimeException {
 	
 	public AccessDeniedException() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	public AccessDeniedException(String message, Throwable cause, boolean enableSuppression,
 			boolean writableStackTrace) {
 		super(message, cause, enableSuppression, writableStackTrace);
-		// TODO Auto-generated constructor stub
 	}
 
 	public AccessDeniedException(String message, Throwable cause) {
 		super(message, cause, false, false);
-		// TODO Auto-generated constructor stub
 	}
 
 	public AccessDeniedException(String message) {
 		super(message, null, false, false);
-		// TODO Auto-generated constructor stub
 	}
 
 	public AccessDeniedException(Throwable cause) {
 		super(null, cause, false, false);
-		// TODO Auto-generated constructor stub
 	}
 }
