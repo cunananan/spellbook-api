@@ -13,7 +13,7 @@ public class ValidationUtil {
 	private static final String EMAIL_PATTERN = "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$";
 	/* Password must have a digit or special character and a letter and have more than 8 characters
 	 */
-	private static final String PASSWORD_PATTERN = "^(?=.*[0-9!@#&()-[{}]:;',?/*~$^+=<>])(?=.*[a-zA-Z]).{8,255}$";
+	private static final String PASSWORD_PATTERN = "^(?=.*[0-9!@#&()-[{}]:;',?/$~+=<>])(?=.*[a-zA-Z]).{8,255}$";
 	
 	public static boolean validateUsername(String value) {
 		return value != null && Pattern.compile(USERNAME_PATTERN).matcher(value).matches();
