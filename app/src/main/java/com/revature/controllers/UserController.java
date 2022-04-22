@@ -158,7 +158,7 @@ public class UserController {
 		MDC.put("endpoint", endpoint);
 		MDC.put("method", method);
 		MDC.put("user", as.extractUsernameFromToken(token));
-		MDC.put("requestId", UUID.randomUUID().toString());
+		MDC.put("requestId", UUID.randomUUID());
 	}
 	
 	private UserRole userRoleFromString(String roleStr) {
@@ -169,7 +169,7 @@ public class UserController {
 			return UserRole.valueOf(roleStr.toUpperCase());
 		} catch (IllegalArgumentException e) {
 			LOG.debug("UserController.userRoleFromString() is catching exception: {}", e.getMessage());
-			LOG.warn("User is passing bad argument through \"role\" param: {}", roleStr);
+			LOG.warn("User is passing bad argument through a UserRole param: {}", roleStr);
 			return UserRole.NOT_SET;
 		}
 	}
