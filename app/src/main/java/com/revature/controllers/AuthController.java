@@ -35,7 +35,13 @@ public class AuthController {
 	                                    @RequestParam(required=false) String password)
 	{
 <<<<<<< HEAD
+<<<<<<< HEAD
 <<<<<<< Updated upstream
+=======
+		MDC.clear();
+		MDC.put("endpoint", "/auth");
+		MDC.put("method", "POST");
+>>>>>>> 8d7cf9155f0283557c15f7c41b2ba1cdaa2f9fc9
 =======
 		MDC.clear();
 		MDC.put("endpoint", "/auth");

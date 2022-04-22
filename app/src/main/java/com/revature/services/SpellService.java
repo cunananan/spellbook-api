@@ -84,8 +84,11 @@ public class SpellService {
 	}
 	
 <<<<<<< HEAD
+<<<<<<< HEAD
 <<<<<<< Updated upstream
 =======
+=======
+>>>>>>> 8d7cf9155f0283557c15f7c41b2ba1cdaa2f9fc9
 =======
 >>>>>>> 8d7cf9155f0283557c15f7c41b2ba1cdaa2f9fc9
 	@Timed(value="spell.time")
@@ -94,6 +97,7 @@ public class SpellService {
 		Spell spell = sr.findById(id).orElseThrow(() -> 
                                          new ItemNotFoundException("Spell not found") );
 <<<<<<< HEAD
+<<<<<<< HEAD
 		if (spell.getStock() <= 0) {
 			throw new OutOfStockException("Out of stock");
 		}
@@ -101,11 +105,16 @@ public class SpellService {
 			throw new InsufficientFundsException("Insufficient funds; price is " + spell.getPrice());
 		}
 =======
+=======
+>>>>>>> 8d7cf9155f0283557c15f7c41b2ba1cdaa2f9fc9
 		if (spell.getStock() <= 0)
 			throw new OutOfStockException("Out of stock");
 		if (funds < spell.getPrice())
 			throw new InsufficientFundsException("Insufficient funds; price is " + spell.getPrice());
 		
+<<<<<<< HEAD
+>>>>>>> 8d7cf9155f0283557c15f7c41b2ba1cdaa2f9fc9
+=======
 >>>>>>> 8d7cf9155f0283557c15f7c41b2ba1cdaa2f9fc9
 		spell.setStock(spell.getStock() - 1);
 		sr.save(spell);
@@ -115,7 +124,10 @@ public class SpellService {
 	
 	@Timed(value="spell.time")
 <<<<<<< HEAD
+<<<<<<< HEAD
 >>>>>>> Stashed changes
+=======
+>>>>>>> 8d7cf9155f0283557c15f7c41b2ba1cdaa2f9fc9
 =======
 >>>>>>> 8d7cf9155f0283557c15f7c41b2ba1cdaa2f9fc9
 	public SpellDto addSpell(SpellDto newSpell) {
