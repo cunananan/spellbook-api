@@ -32,8 +32,11 @@ public class ValidationUtilTests {
 		assertTrue(ValidationUtil.validatePassword("admin123"));
 		assertTrue(ValidationUtil.validatePassword("ADMIN123"));
 		assertTrue(ValidationUtil.validatePassword("testuser!"));
+		assertTrue(ValidationUtil.validatePassword("pas$word"));
 		assertFalse(ValidationUtil.validatePassword("admin"));
 		assertFalse(ValidationUtil.validatePassword("admin!"));
+		assertFalse(ValidationUtil.validatePassword("12345678"));
+		assertFalse(ValidationUtil.validatePassword(""));
 		assertFalse(ValidationUtil.validatePassword(null));
 	}
 }

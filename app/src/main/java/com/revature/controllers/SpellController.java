@@ -22,6 +22,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.revature.exceptions.AccessDeniedException;
+import com.revature.exceptions.InsufficientFundsException;
+import com.revature.exceptions.OutOfStockException;
+import com.revature.exceptions.ValidationException;
 import com.revature.models.Spell.SpellType;
 import com.revature.models.SpellDto;
 import com.revature.models.User.UserRole;
@@ -34,6 +37,7 @@ public class SpellController {
 	
 	private SpellService ss;
 	private AuthService as;
+	private static final String ENDPOINT = "/spells";
 	
 	private static final Logger LOG = LoggerFactory.getLogger(SpellController.class);
 	
@@ -54,49 +58,40 @@ public class SpellController {
 	                                                @RequestParam(name="faiCap", required=false) String faiCapStr,
 	                                                @RequestParam(name="arcCap", required=false) String arcCapStr)
 	{
-		MDC.put("user", as.extractUsernameFromToken(token));
-		MDC.put("requestId", UUID.randomUUID().toString());
+		setMDC(ENDPOINT, "GET", token);
 		
-		SpellType type = null;
-		int priceCap = -1;
-		Boolean inStock = null;
-		int intCap = -1;
-		int faiCap = -1;
-		int arcCap = -1;
 		boolean queriesAllNull = true;
-		
 		if (!StringUtils.isBlank(searchStr)) {
 			queriesAllNull = false;
 		}
-		if (!StringUtils.isBlank(typeStr)) {
-			type = spellTypeFromString(typeStr);
-			if (type != SpellType.NOT_SET) queriesAllNull = false;
+		SpellType type = spellTypeFromString(typeStr);
+		if (type != SpellType.NOT_SET) {
+			queriesAllNull = false;
 		}
-		if (!StringUtils.isBlank(priceCapStr)) {
-			priceCap = intFromString(priceCapStr);
-			if (priceCap >= 0) queriesAllNull = false;
+		int priceCap = intFromString(priceCapStr);
+		if (priceCap >= 0) {
+			queriesAllNull = false;
 		}
-		if (!StringUtils.isBlank(inStockStr)) {
-			inStock = booleanFromString(inStockStr);
-			if (inStock != null) queriesAllNull = false;
+		Boolean inStock = booleanFromString(inStockStr);
+		if (inStock != null) {
+			queriesAllNull = false;
 		}
-		if (!StringUtils.isBlank(intCapStr)) {
-			intCap = intFromString(intCapStr);
-			if (intCap >= 0) queriesAllNull = false;
+		int intCap = intFromString(intCapStr);
+		if (intCap >= 0) {
+			queriesAllNull = false;
 		}
-		if (!StringUtils.isBlank(faiCapStr)) {
-			faiCap = intFromString(faiCapStr);
-			if (faiCap >= 0) queriesAllNull = false;
+		int faiCap = intFromString(faiCapStr);
+		if (faiCap >= 0) {
+			queriesAllNull = false;
 		}
-		if (!StringUtils.isBlank(arcCapStr)) {
-			arcCap = intFromString(arcCapStr);
-			if (arcCap >= 0) queriesAllNull = false;
+		int arcCap = intFromString(arcCapStr);
+		if (arcCap >= 0) {
+			queriesAllNull = false;
 		}
-		
 		List<SpellDto> spells = (queriesAllNull)
 		                            ? ss.getSpells()
 		                            : ss.getSpellsByQuery(searchStr, type, priceCap, inStock, intCap, faiCap, arcCap);
-		LOG.info(spells.size() + " spells were returned");
+		LOG.info("{} spells were returned", spells.size());
 		return new ResponseEntity<>(spells, HttpStatus.OK);
 	}
 	
@@ -104,26 +99,48 @@ public class SpellController {
 	public ResponseEntity<SpellDto> getSpellById(@RequestHeader(name="Authorization", required=false) String token,
 	                                             @PathVariable("id") int id)
 	{
-		MDC.put("user", as.extractUsernameFromToken(token));
-		MDC.put("requestId", UUID.randomUUID().toString());
+		setMDC(ENDPOINT + "/" + id, "GET", token);
 		
 		SpellDto spell = ss.getSpellById(id);
-		LOG.info(spell.toString() + " was returned");
+		LOG.info("{} was returned", spell);
 		return new ResponseEntity<>(spell, HttpStatus.OK);
+	}
+	
+	@PostMapping("/{id}/buy")
+	public ResponseEntity<String> buySpell(@RequestHeader(name="Authorization", required=false) String token,
+	                                       @PathVariable("id") int id,
+	                                       @RequestParam(name="funds", required=false) String fundsStr)
+	{
+		setMDC(ENDPOINT + "/" + id + "/buy", "POST", token);
+		
+		if (!as.authorizeRole(token, UserRole.USER)) {
+			throw new AccessDeniedException("Not authorized to buy spells");
+		}
+		int funds = intFromString(fundsStr);
+		if (funds < 0) {
+			throw new ValidationException("Valid funds were not provided");
+		}
+		String productKey = "product-key:";
+		try {
+			productKey += ss.buySpell(id, funds).toString();
+		} catch (OutOfStockException | InsufficientFundsException e) {
+			LOG.warn("Failed to purchase spell #{}: {}", id, e.getMessage());
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+		}
+		return new ResponseEntity<>(productKey, HttpStatus.OK);
 	}
 	
 	@PostMapping
 	public ResponseEntity<String> addSpell(@RequestHeader(name="Authorization", required=false) String token,
 	                                       @RequestBody SpellDto newSpell)
 	{
-		MDC.put("user", as.extractUsernameFromToken(token));
-		MDC.put("requestId", UUID.randomUUID().toString());
+		setMDC(ENDPOINT, "POST", token);
 		
 		if (!as.authorizeRole(token, UserRole.STAFF, UserRole.ADMIN)) {
 			throw new AccessDeniedException("Not authorized to add spells");
 		}
 		SpellDto spell = ss.addSpell(newSpell);
-		LOG.info(spell.toString() + " was created");
+		LOG.info("{} was created", spell);
 		return new ResponseEntity<>("New spell \"" + spell.name + "\" was added at index " + spell.id, HttpStatus.CREATED);
 	}
 	
@@ -131,15 +148,14 @@ public class SpellController {
 	public ResponseEntity<SpellDto> updateSpell(@RequestHeader(name="Authorization", required=false) String token,
 	                                            @PathVariable("id") int id, @RequestBody SpellDto updates)
 	{
-		MDC.put("user", as.extractUsernameFromToken(token));
-		MDC.put("requestId", UUID.randomUUID().toString());
+		setMDC(ENDPOINT + "/" + id, "PUT", token);
 		
 		if (!as.authorizeRole(token, UserRole.STAFF, UserRole.ADMIN)) {
 			throw new AccessDeniedException("Not authorized to modify spells");
 		}
 		updates.id = id;
 		SpellDto spell = ss.updateSpell(updates);
-		LOG.info("Spell #" + id + " was updated to the following: " + spell.toString());
+		LOG.info("Spell #{} was updated to the following: {}", id, spell);
 		return new ResponseEntity<>(spell, HttpStatus.CREATED);
 	}
 	
@@ -147,44 +163,60 @@ public class SpellController {
 	public ResponseEntity<String> deleteSpell(@RequestHeader(name="Authorization", required=false) String token,
 	                                          @PathVariable("id") int id)
 	{
-		MDC.put("user", as.extractUsernameFromToken(token));
-		MDC.put("requestId", UUID.randomUUID().toString());
+		setMDC(ENDPOINT + "/" + id, "DELETE", token);
 		
 		if (!as.authorizeRole(token, UserRole.STAFF, UserRole.ADMIN)) {
 			throw new AccessDeniedException("Not authorized to delete spells");
 		}
 		SpellDto spell = ss.deleteSpell(id);
-		LOG.info(spell.toString() + " was deleted");
+		LOG.info("{} was deleted", spell);
 		return new ResponseEntity<>("Deleted spell \"" + spell.name + "\"", HttpStatus.OK);
 	}
 	
+	private void setMDC(String endpoint, String method, String token) {
+		MDC.clear();
+		MDC.put("endpoint", endpoint);
+		MDC.put("method", method);
+		MDC.put("user", as.extractUsernameFromToken(token));
+		MDC.put("requestId", UUID.randomUUID());
+	}
+	
 	private int intFromString(String intStr) {
+		if (StringUtils.isBlank(intStr)) {
+			return -1;
+		}
 		try {
 			return Integer.parseInt(intStr);
 		} catch (NumberFormatException e) {
-			LOG.debug("SpellController.intFromString() is catching exception: " + e.getMessage());
-			LOG.warn("User is passing bad argument through `___Cap` param: " + intStr);
+			LOG.debug("SpellController.intFromString() is catching exception: {}", e.getMessage());
+			LOG.warn("User is passing bad argument through an integer param: {}", intStr);
 			return -1;
 		}
 	}
 	
 	private Boolean booleanFromString(String boolStr) {
+		if (StringUtils.isBlank(boolStr)) {
+			return null;
+		}
 		if (boolStr.equalsIgnoreCase("true")) {
 			return Boolean.TRUE;
 		} else if (boolStr.equalsIgnoreCase("false")) {
 			return Boolean.FALSE;
 		} else {
-			LOG.warn("User is passing bad argument through `inStock` param: " + boolStr);
+			LOG.warn("User is passing bad argument through a boolean param: {}", boolStr);
 			return null;
 		}
 	}
 	
 	private SpellType spellTypeFromString(String typeStr) {
+		if (StringUtils.isBlank(typeStr)) {
+			return SpellType.NOT_SET;
+		}
 		try {
 			return SpellType.valueOf(typeStr.toUpperCase());
 		} catch (IllegalArgumentException e) {
-			LOG.debug("SpellController.spellTypeFromString() is catching exception: " + e.getMessage());
-			LOG.warn("User is passing bad argument through `type` param: " + typeStr);
+			LOG.debug("SpellController.spellTypeFromString() is catching exception: {}", e.getMessage());
+			LOG.warn("User is passing bad argument through a SpellType param: {}", typeStr);
 			return SpellType.NOT_SET;
 		}
 	}

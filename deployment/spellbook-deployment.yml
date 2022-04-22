@@ -19,6 +19,13 @@ spec:
         image: cunananan/spellbook:latest
         ports:
         - containerPort: 8080
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
         volumeMounts:
         - name: logs
           mountPath: /logs
@@ -47,6 +54,13 @@ spec:
         image: grafana/promtail
         args:
         - -config.file=/etc/promtail/promtail-config.yml
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "250m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
         volumeMounts:
         - name: logs
           mountPath: /var/log
