@@ -1,13 +1,13 @@
 INSERT INTO users (username, email, password, role)
-VALUES	('radagon', 'radagon@goldenorder.gov', '$2a$16$gK9/K4lesb/fbkX59cAYvOwj86/QY7vxoX104UQODbl5ok4CoT8yW', 'ADMIN'),
-		('mArgIt', 'king_morgott@mail.leyndell.org', '$2a$16$jujbcHLfoP0GqBYNAJLEp.Lmz9Op35u.AbQMxtHzp5V8qSdEvwrDK', 'STAFF'),
-		('m00n_queen', 'rennala.caria@raya-lucaria.edu', '$2a$16$pfedYo38SnM3AbInlg4ZkuuPg0aBJ.xMXZbJF6O6Eoju.Ube97Wfu', 'STAFF'),
-		('goldenboi96', 'godrickRULZ1996@storm-mail.org', '$2a$16$Y7OI8MXXj3R5IR3am0nBkunKTOr54OB4WLquSNusUR3tClbXgjzbG', 'STAFF'),
-		('teh_all_knowing', 'gideon_o@erdmail.com', '$2a$16$BsXx8BCuXlDV1Wk2AC5WzuYxuGHM.UqdQ5muWz9OFWI7kynCB42CS', 'USER'),
-		('daughterOfTheCosmos', 'sellen@raya-lucaria.edu', '$2a$16$CqPVOkVVlcSD3n.K6tFguO67Xokhy9bxAYahc9pRMEvJpDSn3VQki', 'USER'),
-		('xX_alexander_Xx', 'iron_fist_alex@erdmail.com', '$2a$16$yL.qlniID16Z/dPeoD1kcOvUjh3uNb/XkpzYHgiaAN9ftWtc58Pbq', 'USER'),
-		('malenia-blade-of-miquella', 'malenia-blade-of-miquella@haligmail.org', '$2a$16$2AWQ01CmUqCXYm62kZ4LsO86yHo4f1sy2hsiV5JxOcGuTkb.qOyY2', 'USER'),
-		('trustypatches', 'kenneth.haight@erdmail.com', '$2a$16$EzHLCmaxuN/ltzlMBVI45uJUXWNWF3O.BmFDqPfGfEmM11uaYHlXS', 'STAFF');
+VALUES	('radagon', 'radagon@goldenorder.gov', '$2a$10$zntd1NwbRnf5VRIV.EwyMOj0BBdFbG77FlfuSGl/NpkPJPaqWEt5K', 'ADMIN'),
+		('mArgIt', 'king_morgott@mail.leyndell.org', '$2a$10$PmTkxznnQ5WpDPIdrJYcMegYLegGguiudvwhUYzaTY8nUK73TDasa', 'STAFF'),
+		('m00n_queen', 'rennala.caria@raya-lucaria.edu', '$2a$10$.LTWffMeflMHkHL.iSP3oOW4Sg6dtWGg.wXXeCBJDucPEPjmOLg46', 'STAFF'),
+		('goldenboi96', 'godrickRULZ1996@storm-mail.org', '$2a$10$oz82iRK5qCqzw3Q1kRMnVO0vuRRtrhJJ19oc9NeQaA7MEXFd/Hp5K', 'STAFF'),
+		('teh_all_knowing', 'gideon_o@erdmail.com', '$2a$10$/J1NhFLQoi9.cs0cNV5p3u3FjzMLaaFvSHPWZSpphlapSMt7vSBGa', 'USER'),
+		('daughterOfTheCosmos', 'sellen@raya-lucaria.edu', '$2a$10$gfqr/PIXD9sXWrqLJUyJ2ejN86o1RYKQVHMPPe4qqrttUZn8jBUN6', 'USER'),
+		('xX_alexander_Xx', 'iron_fist_alex@erdmail.com', '$2a$10$kR2BgHEp5LP/cbcdO97HzuTR57dRPliYruT6PxRbeHCeB/nqhxybm', 'USER'),
+		('malenia-blade-of-miquella', 'malenia-blade-of-miquella@haligmail.org', '$2a$10$W/gGpNEnwjHRvgL/9//E4u5K2HOYqeRdKyWsM3.TQ272DVF5Xe/NW', 'USER'),
+		('trustypatches', 'kenneth.haight@erdmail.com', '$2a$10$XlRD4zL3yz4UwID.ZV5yxOvy6NY6koh/xVwtJkjwtUUNk6MDiWrXC', 'STAFF');
 
 
 
