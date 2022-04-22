@@ -34,8 +34,6 @@ public class SpellService {
 	
 	@Timed(value="spell.time")
 	public List<SpellDto> getSpells() {
-		LOG.debug("getSpells method ran");
-
 		List<Spell> spells = sr.findAllByOrderByIdAsc();
 		if (spells.isEmpty()) {
 			throw new ItemNotFoundException("No spells were found");

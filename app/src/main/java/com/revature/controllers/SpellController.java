@@ -34,6 +34,7 @@ public class SpellController {
 	
 	private SpellService ss;
 	private AuthService as;
+	private static final String ENDPOINT = "/spells";
 	
 	private static final Logger LOG = LoggerFactory.getLogger(SpellController.class);
 	
@@ -54,8 +55,7 @@ public class SpellController {
 	                                                @RequestParam(name="faiCap", required=false) String faiCapStr,
 	                                                @RequestParam(name="arcCap", required=false) String arcCapStr)
 	{
-		MDC.put("user", as.extractUsernameFromToken(token));
-		MDC.put("requestId", UUID.randomUUID().toString());
+		setMDC(ENDPOINT, "GET", token);
 		
 		SpellType type = null;
 		int priceCap = -1;
@@ -96,7 +96,7 @@ public class SpellController {
 		List<SpellDto> spells = (queriesAllNull)
 		                            ? ss.getSpells()
 		                            : ss.getSpellsByQuery(searchStr, type, priceCap, inStock, intCap, faiCap, arcCap);
-		LOG.info(spells.size() + " spells were returned");
+		LOG.info("{} spells were returned", spells.size());
 		return new ResponseEntity<>(spells, HttpStatus.OK);
 	}
 	
@@ -104,11 +104,10 @@ public class SpellController {
 	public ResponseEntity<SpellDto> getSpellById(@RequestHeader(name="Authorization", required=false) String token,
 	                                             @PathVariable("id") int id)
 	{
-		MDC.put("user", as.extractUsernameFromToken(token));
-		MDC.put("requestId", UUID.randomUUID().toString());
+		setMDC(ENDPOINT + "/" + id, "GET", token);
 		
 		SpellDto spell = ss.getSpellById(id);
-		LOG.info(spell.toString() + " was returned");
+		LOG.info("{} was returned", spell);
 		return new ResponseEntity<>(spell, HttpStatus.OK);
 	}
 	
@@ -116,14 +115,13 @@ public class SpellController {
 	public ResponseEntity<String> addSpell(@RequestHeader(name="Authorization", required=false) String token,
 	                                       @RequestBody SpellDto newSpell)
 	{
-		MDC.put("user", as.extractUsernameFromToken(token));
-		MDC.put("requestId", UUID.randomUUID().toString());
+		setMDC(ENDPOINT, "POST", token);
 		
 		if (!as.authorizeRole(token, UserRole.STAFF, UserRole.ADMIN)) {
 			throw new AccessDeniedException("Not authorized to add spells");
 		}
 		SpellDto spell = ss.addSpell(newSpell);
-		LOG.info(spell.toString() + " was created");
+		LOG.info("{} was created", spell);
 		return new ResponseEntity<>("New spell \"" + spell.name + "\" was added at index " + spell.id, HttpStatus.CREATED);
 	}
 	
@@ -131,15 +129,14 @@ public class SpellController {
 	public ResponseEntity<SpellDto> updateSpell(@RequestHeader(name="Authorization", required=false) String token,
 	                                            @PathVariable("id") int id, @RequestBody SpellDto updates)
 	{
-		MDC.put("user", as.extractUsernameFromToken(token));
-		MDC.put("requestId", UUID.randomUUID().toString());
+		setMDC(ENDPOINT + "/" + id, "PUT", token);
 		
 		if (!as.authorizeRole(token, UserRole.STAFF, UserRole.ADMIN)) {
 			throw new AccessDeniedException("Not authorized to modify spells");
 		}
 		updates.id = id;
 		SpellDto spell = ss.updateSpell(updates);
-		LOG.info("Spell #" + id + " was updated to the following: " + spell.toString());
+		LOG.info("Spell #{} was updated to the following: {}", id, spell);
 		return new ResponseEntity<>(spell, HttpStatus.CREATED);
 	}
 	
@@ -147,23 +144,30 @@ public class SpellController {
 	public ResponseEntity<String> deleteSpell(@RequestHeader(name="Authorization", required=false) String token,
 	                                          @PathVariable("id") int id)
 	{
-		MDC.put("user", as.extractUsernameFromToken(token));
-		MDC.put("requestId", UUID.randomUUID().toString());
+		setMDC(ENDPOINT + "/" + id, "DELETE", token);
 		
 		if (!as.authorizeRole(token, UserRole.STAFF, UserRole.ADMIN)) {
 			throw new AccessDeniedException("Not authorized to delete spells");
 		}
 		SpellDto spell = ss.deleteSpell(id);
-		LOG.info(spell.toString() + " was deleted");
+		LOG.info("{} was deleted", spell);
 		return new ResponseEntity<>("Deleted spell \"" + spell.name + "\"", HttpStatus.OK);
+	}
+	
+	private void setMDC(String endpoint, String method, String token) {
+		MDC.clear();
+		MDC.put("endpoint", endpoint);
+		MDC.put("method", method);
+		MDC.put("user", as.extractUsernameFromToken(token));
+		MDC.put("requestId", UUID.randomUUID().toString());
 	}
 	
 	private int intFromString(String intStr) {
 		try {
 			return Integer.parseInt(intStr);
 		} catch (NumberFormatException e) {
-			LOG.debug("SpellController.intFromString() is catching exception: " + e.getMessage());
-			LOG.warn("User is passing bad argument through `___Cap` param: " + intStr);
+			LOG.debug("SpellController.intFromString() is catching exception: {}", e.getMessage());
+			LOG.warn("User is passing bad argument through `___Cap` param: {}", intStr);
 			return -1;
 		}
 	}
@@ -174,7 +178,7 @@ public class SpellController {
 		} else if (boolStr.equalsIgnoreCase("false")) {
 			return Boolean.FALSE;
 		} else {
-			LOG.warn("User is passing bad argument through `inStock` param: " + boolStr);
+			LOG.warn("User is passing bad argument through `inStock` param: {}", boolStr);
 			return null;
 		}
 	}
@@ -183,8 +187,8 @@ public class SpellController {
 		try {
 			return SpellType.valueOf(typeStr.toUpperCase());
 		} catch (IllegalArgumentException e) {
-			LOG.debug("SpellController.spellTypeFromString() is catching exception: " + e.getMessage());
-			LOG.warn("User is passing bad argument through `type` param: " + typeStr);
+			LOG.debug("SpellController.spellTypeFromString() is catching exception: {}", e.getMessage());
+			LOG.warn("User is passing bad argument through `type` param: {}", typeStr);
 			return SpellType.NOT_SET;
 		}
 	}

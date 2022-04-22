@@ -34,13 +34,17 @@ public class AuthController {
 	public ResponseEntity<String> login(@RequestParam(required=false) String username,
 	                                    @RequestParam(required=false) String password)
 	{
+		MDC.clear();
+		MDC.put("endpoint", "/auth");
+		MDC.put("method", "POST");
 		MDC.put("requestId", UUID.randomUUID().toString());
 		// Login will throw runtime exceptions if credentials are bad
 		String token = as.login(username, password);
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("Authorization", token);
 		
-		LOG.info("User `" + username + "` logged in successfully");
+		String uname = as.extractUsernameFromToken(token);
+		LOG.info("User `{}` logged in successfully", uname);
 		return new ResponseEntity<>("Login successful.", headers, HttpStatus.OK);
 	}
 }
