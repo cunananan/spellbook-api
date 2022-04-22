@@ -77,6 +77,27 @@ public class SpellService {
 		return new SpellDto(spell);
 	}
 	
+<<<<<<< Updated upstream
+=======
+	@Timed(value="spell.time")
+	@Transactional
+	public UUID buySpell(int id, int funds) throws OutOfStockException, InsufficientFundsException {
+		Spell spell = sr.findById(id).orElseThrow(() -> 
+                                         new ItemNotFoundException("Spell not found") );
+		if (spell.getStock() <= 0) {
+			throw new OutOfStockException("Out of stock");
+		}
+		if (funds < spell.getPrice()) {
+			throw new InsufficientFundsException("Insufficient funds; price is " + spell.getPrice());
+		}
+		spell.setStock(spell.getStock() - 1);
+		sr.save(spell);
+		// Return a product key for the spell
+		return UUID.randomUUID();
+	}
+	
+	@Timed(value="spell.time")
+>>>>>>> Stashed changes
 	public SpellDto addSpell(SpellDto newSpell) {
 		if (newSpell == null) newSpell = new SpellDto();
 		newSpell.id = -1;	// Ensure we don't overwrite an existing item
