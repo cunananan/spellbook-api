@@ -36,6 +36,7 @@ public class UserController {
 	
 	private UserService us;
 	private AuthService as;
+	private static final String ENDPOINT = "/users";
 	
 	private static final Logger LOG = LoggerFactory.getLogger(UserController.class);
 	
@@ -51,15 +52,14 @@ public class UserController {
 			                                      @RequestParam(name="search", required=false) String searchStr,
 	                                              @RequestParam(name="role", required=false) String roleStr)
 	{
-		MDC.put("user", as.extractUsernameFromToken(token));
-		MDC.put("requestId", UUID.randomUUID().toString());
+		setMDC(ENDPOINT, "GET", token);
 		
 		List<UserDto> users;
 		// If user is not an admin, only show self
 		if (!as.authorizeRole(token, UserRole.ADMIN)) {
 			users = new ArrayList<>();
 			users.add(us.getUserById(as.extractIdFromToken(token)));
-			LOG.info(users.toString() + " was returned");
+			LOG.info("{} was returned", users);
 			return new ResponseEntity<>(users, HttpStatus.OK);
 		}
 		UserRole role = null;
@@ -74,7 +74,7 @@ public class UserController {
 		}
 		// May throw runtime exceptions; handled by GlobalExceptionHandler
 		users = (queriesAllNull) ? us.getUsers() : us.getUsersByQuery(searchStr, role);
-		LOG.info(users.size() + " users were returned");
+		LOG.info("{} users were returned", users.size());
 		return new ResponseEntity<>(users, HttpStatus.OK);
 	}
 	
@@ -82,15 +82,14 @@ public class UserController {
 	public ResponseEntity<UserDto> getUserById(@RequestHeader(name="Authorization", required=false) String token,
 	                                           @PathVariable("id") int id)
 	{
-		MDC.put("user", as.extractUsernameFromToken(token));
-		MDC.put("requestId", UUID.randomUUID().toString());
+		setMDC(ENDPOINT + "/" + id, "GET", token);
 		// Only admins and the id's user can view this
 		if (!as.authorizeRole(token, UserRole.ADMIN) && !as.authorizeUser(token, id)) {
-			LOG.warn("Failed to view User #" + id);
+			LOG.warn("Failed to view User #{}", id);
 			throw new AccessDeniedException("Not authorized to view user");
 		}
 		UserDto user = us.getUserById(id);
-		LOG.info(user.toString() + " was returned");
+		LOG.info("{} was returned", user);
 		return new ResponseEntity<>(user, HttpStatus.OK);
 	}
 	
@@ -98,15 +97,14 @@ public class UserController {
 	public ResponseEntity<String> createUser(@RequestHeader(name="Authorization", required=false) String token,
 	                                         @RequestBody User newUser)
 	{
-		MDC.put("user", as.extractUsernameFromToken(token));
-		MDC.put("requestId", UUID.randomUUID().toString());
+		setMDC(ENDPOINT, "POST", token);
 		// If user is not an admin, can only add a user with the USER role
 		if (StringUtils.isBlank(token) || !as.authorizeRole(token, UserRole.ADMIN)) {
-			LOG.debug("New user being created by non-admin; role reduced to USER from " + newUser.getRole());
+			LOG.debug("New user being created by non-admin; role reduced to USER from {}", newUser.getRole());
 			newUser.setRole(UserRole.USER);
 		}
 		UserDto user = us.addUser(newUser);
-		LOG.info(user.toString() + " was created");
+		LOG.info("{} was created", user);
 		return new ResponseEntity<>("New user \"" + user.username + "\" was added at index " + user.id, HttpStatus.CREATED);
 	}
 	
@@ -117,13 +115,12 @@ public class UserController {
 	                                         @RequestParam(name="newPassword", required=false) String newPass,
 	                                         @RequestParam(name="newRole", required=false) String newRole)
 	{
-		MDC.put("user", as.extractUsernameFromToken(token));
-		MDC.put("requestId", UUID.randomUUID().toString());
+		setMDC(ENDPOINT + "/" + id, "PUT", token);
 		
 		// Admin can change user role and password without confirmation
 		if (as.authorizeRole(token, UserRole.ADMIN)) {
 			String message = us.updateUser(id, newPass, userRoleFromString(newRole));
-			LOG.info(message + " for User #" + id);
+			LOG.info("{} for User #{}", message, id);
 			return new ResponseEntity<>(message, HttpStatus.CREATED);
 		}
 		// User can change own password, but must provide current password first
@@ -132,11 +129,11 @@ public class UserController {
 				throw new ValidationException("Current password was incorrect");
 			}
 			us.updateUserPassword(id, newPass);
-			LOG.info("Password was updated for User #" + id);
+			LOG.info("Password was updated for User #{}", id);
 			return new ResponseEntity<>("Password was updated", HttpStatus.CREATED);
 		}
 		else {
-			LOG.warn("Failed to modify User #" + id);
+			LOG.warn("Failed to modify User #{}", id);
 			throw new AccessDeniedException("Not authorized to modify user");
 		}
 	}
@@ -145,16 +142,23 @@ public class UserController {
 	public ResponseEntity<String> deleteUser(@RequestHeader(name="Authorization", required=false) String token,
 	                                         @PathVariable("id") int id)
 	{
-		MDC.put("user", as.extractUsernameFromToken(token));
-		MDC.put("requestId", UUID.randomUUID().toString());
+		setMDC(ENDPOINT + "/" + id, "DELETE", token);
 		
 		if (!as.authorizeRole(token, UserRole.ADMIN)) {
-			LOG.warn("Failed to delete User #" + id);
+			LOG.warn("Failed to delete User #{}", id);
 			throw new AccessDeniedException("Not authorized to delete users");
 		}
 		UserDto user = us.deleteUser(id);
-		LOG.info(user.toString() + " was deleted");
+		LOG.info("{} was deleted", user);
 		return new ResponseEntity<>("Deleted user \"" + user.username + "\"", HttpStatus.OK);
+	}
+	
+	private void setMDC(String endpoint, String method, String token) {
+		MDC.clear();
+		MDC.put("endpoint", endpoint);
+		MDC.put("method", method);
+		MDC.put("user", as.extractUsernameFromToken(token));
+		MDC.put("requestId", UUID.randomUUID());
 	}
 	
 	private UserRole userRoleFromString(String roleStr) {
@@ -164,8 +168,8 @@ public class UserController {
 		try {
 			return UserRole.valueOf(roleStr.toUpperCase());
 		} catch (IllegalArgumentException e) {
-			LOG.debug("UserController.userRoleFromString() is catching exception: " + e.getMessage());
-			LOG.warn("User is passing bad argument through \"role\" param: " + roleStr);
+			LOG.debug("UserController.userRoleFromString() is catching exception: {}", e.getMessage());
+			LOG.warn("User is passing bad argument through a UserRole param: {}", roleStr);
 			return UserRole.NOT_SET;
 		}
 	}

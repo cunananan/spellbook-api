@@ -1,6 +1,7 @@
 package com.revature.services;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -11,12 +12,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.revature.exceptions.InsufficientFundsException;
 import com.revature.exceptions.ItemNotFoundException;
+import com.revature.exceptions.OutOfStockException;
 import com.revature.exceptions.ValidationException;
 import com.revature.models.Spell;
 import com.revature.models.Spell.SpellType;
 import com.revature.models.SpellDto;
 import com.revature.repositories.SpellRepository;
+
+import io.micrometer.core.annotation.Timed;
 
 @Service
 public class SpellService {
@@ -30,9 +35,8 @@ public class SpellService {
 		this.sr = sr;
 	}
 	
+	@Timed(value="spell.time")
 	public List<SpellDto> getSpells() {
-		LOG.debug("getSpells method ran");
-
 		List<Spell> spells = sr.findAllByOrderByIdAsc();
 		if (spells.isEmpty()) {
 			throw new ItemNotFoundException("No spells were found");
@@ -41,6 +45,7 @@ public class SpellService {
 		return spells.stream().map(SpellDto::new).collect(Collectors.toList());
 	}
 	
+	@Timed(value="spell.time")
 	@Transactional
 	public List<SpellDto> getSpellsByQuery(String search, SpellType type, int priceCap, Boolean inStock,
             int intCap, int faiCap, int arcCap)
@@ -71,25 +76,37 @@ public class SpellService {
 		return spellsDto;
 	}
 	
+	@Timed(value="spell.time")
 	public SpellDto getSpellById(int id) {
 		Spell spell = sr.findById(id).orElseThrow(() -> 
 		                                 new ItemNotFoundException("Spell not found") );
 		return new SpellDto(spell);
 	}
 	
+<<<<<<< HEAD
 <<<<<<< Updated upstream
 =======
+=======
+>>>>>>> 8d7cf9155f0283557c15f7c41b2ba1cdaa2f9fc9
 	@Timed(value="spell.time")
 	@Transactional
 	public UUID buySpell(int id, int funds) throws OutOfStockException, InsufficientFundsException {
 		Spell spell = sr.findById(id).orElseThrow(() -> 
                                          new ItemNotFoundException("Spell not found") );
+<<<<<<< HEAD
 		if (spell.getStock() <= 0) {
 			throw new OutOfStockException("Out of stock");
 		}
 		if (funds < spell.getPrice()) {
 			throw new InsufficientFundsException("Insufficient funds; price is " + spell.getPrice());
 		}
+=======
+		if (spell.getStock() <= 0)
+			throw new OutOfStockException("Out of stock");
+		if (funds < spell.getPrice())
+			throw new InsufficientFundsException("Insufficient funds; price is " + spell.getPrice());
+		
+>>>>>>> 8d7cf9155f0283557c15f7c41b2ba1cdaa2f9fc9
 		spell.setStock(spell.getStock() - 1);
 		sr.save(spell);
 		// Return a product key for the spell
@@ -97,7 +114,10 @@ public class SpellService {
 	}
 	
 	@Timed(value="spell.time")
+<<<<<<< HEAD
 >>>>>>> Stashed changes
+=======
+>>>>>>> 8d7cf9155f0283557c15f7c41b2ba1cdaa2f9fc9
 	public SpellDto addSpell(SpellDto newSpell) {
 		if (newSpell == null) newSpell = new SpellDto();
 		newSpell.id = -1;	// Ensure we don't overwrite an existing item
@@ -107,6 +127,7 @@ public class SpellService {
 		return newSpell;
 	}
 	
+	@Timed(value="spell.time")
 	@Transactional
 	public SpellDto updateSpell(SpellDto spellUpdates) {
 		if (spellUpdates == null) {
@@ -120,6 +141,7 @@ public class SpellService {
 		return spellUpdates;
 	}
 	
+	@Timed(value="spell.time")
 	@Transactional
 	public SpellDto deleteSpell(int id) {
 		Spell removedSpell = sr.findById(id).orElseThrow(() -> 
@@ -129,6 +151,7 @@ public class SpellService {
 	}
 	
 	// This is slow and I kind of hate it
+	@Timed(value="spell.time")
 	private List<Spell> findBySearchNameAndDescription(String search) {
 		List<Spell> nameList = sr.findByNameContainingIgnoreCaseOrderByIdAsc(search);
 		List<Spell> descList = sr.findByDescriptionContainingIgnoreCaseOrderByIdAsc(search);

@@ -19,17 +19,17 @@ import com.revature.models.User.UserRole;
 import com.revature.repositories.UserRepository;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
+import io.micrometer.core.annotation.Timed;
 
 @Service
 public class AuthService {
 	
-	private static final long TOKEN_LIFETIME_SECONDS = 900;	// 15 minutes
+//	private static final long TOKEN_LIFETIME_SECONDS = 900;	// 15 minutes
 	private static final Logger LOG = LoggerFactory.getLogger(AuthService.class);
 	
 	private UserRepository ur;
@@ -50,6 +50,7 @@ public class AuthService {
 	}
 	
 	// Returns token as string iff successful
+	@Timed(value="login.time")
 	public String login(String user, String password) {
 		if (StringUtils.isBlank(user)) {
 			throw new AuthenticationException("Username or email was not provided");
@@ -161,7 +162,7 @@ public class AuthService {
 	private String generateToken(User user) {
 		if (user == null) return null;
 		
-		Date exp = Date.from(new Date().toInstant().plusSeconds(TOKEN_LIFETIME_SECONDS));
+//		Date exp = Date.from(new Date().toInstant().plusSeconds(TOKEN_LIFETIME_SECONDS));
 		String jws = Jwts.builder()
 		                 .claim("id", user.getId())
 		                 .setSubject(user.getUsername())
@@ -169,8 +170,8 @@ public class AuthService {
 //		                 .setExpiration(exp)
 		                 .signWith(secretKey, SignatureAlgorithm.HS256)
 		                 .compact();
-		LOG.debug("generateToken method ran");
-		LOG.info("New JWT was generated for user: " + user.getUsername());
+		LOG.debug("generateToken method called");
+		LOG.info("New JWT was generated for user: {}", user.getUsername());
 		return jws;
 	}
 }

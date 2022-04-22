@@ -2,6 +2,7 @@ package com.revature.services;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -9,13 +10,16 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.revature.exceptions.InsufficientFundsException;
 import com.revature.exceptions.ItemNotFoundException;
+import com.revature.exceptions.OutOfStockException;
 import com.revature.exceptions.ValidationException;
 import com.revature.models.Spell;
 import com.revature.models.Spell.SpellType;
@@ -35,8 +39,8 @@ public class SpellServiceTests {
 		mockRepo = mock(SpellRepository.class);
 		ss = new SpellService(mockRepo);
 
-		Spell spell1 = new Spell(1, "first", "", 0, 0, SpellType.SORCERY, 1000, 1, 1, 10, 0, 0);
-		Spell spell2 = new Spell(2, "second", "", 0, 0, SpellType.INCANTATION, 0, 0, 1, 0, 10, 0);
+		Spell spell1 = new Spell(1, "first", "", 100, 1, SpellType.SORCERY, 1000, 1, 1, 10, 0, 0);
+		Spell spell2 = new Spell(2, "second", "", 200, 0, SpellType.INCANTATION, 0, 0, 1, 0, 10, 0);
 		spells = new ArrayList<>();
 		spells.add(spell1);
 		spells.add(spell2);
@@ -101,6 +105,42 @@ public class SpellServiceTests {
 		when(mockRepo.findById(1)).thenReturn(Optional.of(spells.get(0)));
 		assertDoesNotThrow(() -> {
 			assertEquals(spellsDto.get(0), ss.getSpellById(1));
+		});
+	}
+	
+	@Test
+	void buySpellTestX0() {
+		when(mockRepo.findById(0)).thenReturn(Optional.empty());
+		assertThrows(ItemNotFoundException.class, () -> {
+			ss.buySpell(0, 300);
+		});
+	}
+	
+	@Test
+	void buySpellTestX1() {
+		when(mockRepo.findById(2)).thenReturn(Optional.of(spells.get(1)));
+		assertThrows(OutOfStockException.class, () -> {
+			ss.buySpell(2, 300);
+		});
+	}
+	
+	@Test
+	void buySpellTestX2() {
+		when(mockRepo.findById(1)).thenReturn(Optional.of(spells.get(0)));
+		assertThrows(InsufficientFundsException.class, () -> {
+			ss.buySpell(1, 50);
+		});
+	}
+	
+	@Test
+	void buySpellTest0() {
+		Spell spell = new Spell(1, "first", "", 100, 1, SpellType.SORCERY, 1000, 1, 1, 10, 0, 0);
+		when(mockRepo.findById(1)).thenReturn(Optional.of(spell));
+		assertDoesNotThrow(() -> {
+			UUID key = ss.buySpell(1, 500);
+			assertNotNull(key);
+			System.out.println(key);
+			assertEquals(0, spell.getStock());
 		});
 	}
 
