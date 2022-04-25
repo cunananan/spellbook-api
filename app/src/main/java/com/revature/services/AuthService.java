@@ -2,7 +2,6 @@ package com.revature.services;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
-import java.util.Date;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -29,7 +28,6 @@ import io.micrometer.core.annotation.Timed;
 @Service
 public class AuthService {
 	
-//	private static final long TOKEN_LIFETIME_SECONDS = 900;	// 15 minutes
 	private static final Logger LOG = LoggerFactory.getLogger(AuthService.class);
 	
 	private UserRepository ur;
@@ -111,9 +109,6 @@ public class AuthService {
 			                      .build()
 			                      .parseClaimsJws(token);
 			return jws.getBody().get("id", Integer.class);
-//		} catch (ExpiredJwtException e) {
-//			LOG.warn("Access was denied because token was expired");
-//			throw new AuthorizationException("Expired token");
 		} catch (SignatureException e) {
 			LOG.warn("Access was denied because token signature did not match");
 			throw new AuthorizationException("Token signature does not match");
@@ -130,9 +125,6 @@ public class AuthService {
 			                      .build()
 			                      .parseClaimsJws(token);
 			return UserRole.valueOf(jws.getBody().get("role", String.class));
-//		} catch (ExpiredJwtException e) {
-//			LOG.warn("Access was denied because token was expired");
-//			throw new AuthorizationException("Expired token");
 		} catch (SignatureException e) {
 			LOG.warn("Access was denied because token signature did not match");
 			throw new AuthorizationException("Token signature does not match");
@@ -160,17 +152,15 @@ public class AuthService {
 	}
 	
 	private String generateToken(User user) {
+		LOG.debug("generateToken method called");
 		if (user == null) return null;
 		
-//		Date exp = Date.from(new Date().toInstant().plusSeconds(TOKEN_LIFETIME_SECONDS));
 		String jws = Jwts.builder()
 		                 .claim("id", user.getId())
 		                 .setSubject(user.getUsername())
 		                 .claim("role", user.getRole())
-//		                 .setExpiration(exp)
 		                 .signWith(secretKey, SignatureAlgorithm.HS256)
 		                 .compact();
-		LOG.debug("generateToken method called");
 		LOG.info("New JWT was generated for user: {}", user.getUsername());
 		return jws;
 	}

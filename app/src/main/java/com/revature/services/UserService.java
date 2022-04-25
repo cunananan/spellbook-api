@@ -7,8 +7,6 @@ import java.util.stream.Stream;
 import javax.transaction.Transactional;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -29,7 +27,6 @@ public class UserService {
 	
 	private UserRepository ur;
 	private PasswordEncoder pe;
-	private static final Logger LOG = LoggerFactory.getLogger(AuthService.class);
 	
 	@Autowired
 	public UserService(UserRepository ur, PasswordEncoder pe) {
@@ -39,7 +36,6 @@ public class UserService {
 	
 	@Timed(value="user.time")
 	public List<UserDto> getUsers() {
-		LOG.debug("getUsers method ran");
 		List<User> users = ur.findAllByOrderByIdAsc();
 		if (users.isEmpty()) {
 			throw new UserNotFoundException("No users were found");
